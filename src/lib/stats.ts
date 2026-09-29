@@ -22,6 +22,10 @@ export interface IdentifiedItem {
   id: string;
   /** Nom anglais de l'objet (sert à construire le lien Traderie). */
   name: string;
+  /** Nom français saisi, quand il a été traduit. */
+  nameFr?: string;
+  /** false : nom absent des textes du jeu, le lien Traderie est incertain. */
+  known?: boolean;
   /** Valeur notée par le joueur, texte libre (« 2 Ist », « 1 Ber »…). */
   value: string;
 }

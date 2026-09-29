@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ITEM_NAMES } from "../data/itemCatalog";
+import { ITEM_NAMES_FR_EN } from "../data/itemNames";
+import { isPartialName, resolveItemName } from "../lib/itemTranslate";
 import type { Character } from "../lib/characters";
 import type { IdentifiedItem } from "../lib/stats";
 import { traderieUrl } from "../lib/traderie";
@@ -17,10 +18,20 @@ export default function ItemLog({ items, onChange, character, inputId }: Props) 
   const [name, setName] = useState("");
   const realm = character ?? { ladder: true, hardcore: false };
 
+  const preview = name.trim() ? resolveItemName(name) : null;
+
   const add = () => {
-    const clean = name.trim();
-    if (!clean) return;
-    onChange([...items, { id: `i${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`, name: clean, value: "" }]);
+    if (!preview) return;
+    onChange([
+      ...items,
+      {
+        id: `i${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`,
+        name: preview.english,
+        nameFr: preview.french,
+        known: preview.known,
+        value: "",
+      },
+    ]);
     setName("");
   };
 
@@ -41,24 +52,42 @@ export default function ItemLog({ items, onChange, character, inputId }: Props) 
           list="item-names"
           value={name}
           autoComplete="off"
-          placeholder="Nom anglais de l'objet, ex. Harlequin Crest"
+          placeholder="Nom de l'objet en jeu, ex. Cimier Arlequin"
           onChange={(e) => setName(e.target.value)}
         />
         <button type="submit" className="primary" disabled={!name.trim()}>
           Ajouter
         </button>
         <datalist id="item-names">
-          {ITEM_NAMES.map((n) => (
-            <option key={n} value={n} />
+          {ITEM_NAMES_FR_EN.map(([fr, en]) => (
+            <option key={fr} value={fr} label={en} />
           ))}
         </datalist>
       </form>
+      {preview && (
+        <p
+          className={preview.known ? "translation" : isPartialName(name) ? "translation pending" : "translation unknown"}
+          aria-live="polite"
+        >
+          {preview.known
+            ? preview.french
+              ? `→ ${preview.english} (nom anglais pour Traderie)`
+              : `→ ${preview.english}`
+            : isPartialName(name)
+              ? "Continuez la saisie ou choisissez un nom dans la liste."
+              : "Nom non reconnu : le lien Traderie utilisera le texte tel quel. Vérifiez l'orthographe du jeu."}
+        </p>
+      )}
 
       {items.length > 0 && (
         <ul className="items">
           {items.map((item) => (
             <li key={item.id}>
-              <span className="item-name">{item.name}</span>
+              <span className="item-name">
+                {item.nameFr ?? item.name}
+                {item.nameFr && <small className="item-en">{item.name}</small>}
+                {item.known === false && <small className="item-unknown">nom non reconnu</small>}
+              </span>
               <a className="traderie" href={traderieUrl(item.name, realm)} target="_blank" rel="noopener noreferrer">
                 Prix Traderie ↗
               </a>
@@ -84,7 +113,8 @@ export default function ItemLog({ items, onChange, character, inputId }: Props) 
       )}
       <p className="hint">
         Traderie s'ouvre sur les échanges vérifiés récents, filtrés {realm.ladder ? "Ladder" : "Non-ladder"}{" "}
-        {realm.hardcore ? "Hardcore" : "Softcore"} comme le personnage. Utilisez le nom anglais du jeu.
+        {realm.hardcore ? "Hardcore" : "Softcore"} comme le personnage. Saisissez le nom en français (ou en anglais) : il est traduit
+        automatiquement.
       </p>
     </div>
   );

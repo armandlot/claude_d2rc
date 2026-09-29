@@ -1262,3 +1262,30 @@ select {
 }
 .review-label { margin: 0; font-size: 13px; color: var(--muted); }
 .review-todo .badge { border-color: var(--c); color: var(--c); }
+
+/* ---- traduction FR -> EN ---- */
+.translation {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--set);
+}
+
+.translation.unknown {
+  color: #e6b35a;
+}
+
+.item-name {
+  display: grid;
+}
+
+.item-en,
+.item-unknown {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.item-unknown {
+  color: #e6b35a;
+}
+.translation.pending { color: var(--muted); }

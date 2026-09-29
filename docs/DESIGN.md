@@ -77,6 +77,14 @@ plus**.
   - mode et ladder : ceux du personnage de la session ;
   - version du jeu : constante `DEFAULT_GAME_VERSION`, en attendant d'en faire
     un champ du personnage.
+- Traduction français → anglais (`src/lib/itemTranslate.ts`) : ~2 200 noms
+  officiels extraits des textes du jeu (`item-names.json`, `item-runes.json`,
+  anciennes et nouvelles traductions) par `scripts/build-item-names.py`, qui
+  génère `src/data/itemNames.ts`. Recherche insensible aux accents, à la casse,
+  à « Œ/Oe » et aux apostrophes ; noms courts des runes (« Ber ») acceptés.
+  Piège connu : « Grand charme » = Large Charm, « Charme majeur » = Grand Charm.
+  Pour régénérer après une mise à jour du jeu :
+  `python3 scripts/build-item-names.py <dossier data/local/lng> > src/data/itemNames.ts`.
 - Les objets restent enregistrés avec la session ; le lien « Identifier » d'une
   session enregistrée rouvre sa revue.
 

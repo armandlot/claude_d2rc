@@ -48,8 +48,18 @@ plus**.
 - Les sessions v2, liées à un build, sont reprises automatiquement : un
   personnage est créé par build rencontré.
 
-Les statistiques (`src/lib/stats.ts`), personnages (`characters.ts`) et
-verdicts (`verdict.ts`) sont des fonctions pures, couvertes par des tests.
+### Routes custom (v4)
+
+- Une route custom = une suite ordonnée d'étapes (boss ou zones, catalogue
+  `src/data/stops.ts`) faites dans la même partie, et un nom facultatif (par
+  défaut « Pindleskin → Mephisto → Summoner → Andariel »).
+- Un run = une partie complète : le joueur clique « +1 run » après la dernière étape.
+- Elle se compare aux routes classiques partout (Session, Comparaison, Verdict :
+  « la route « Tour MF » est plus efficace que les runs Chaos »).
+- Supprimer une route supprime ses sessions (après confirmation).
+
+Les statistiques (`src/lib/stats.ts`), personnages (`characters.ts`), routes
+custom (`customRoutes.ts`) et verdicts (`verdict.ts`) sont des fonctions pures, couvertes par des tests.
 
 ## 4. Choix techniques
 
@@ -67,6 +77,8 @@ verdicts (`verdict.ts`) sont des fonctions pures, couvertes par des tests.
 - [x] v1 : simulateur de valeur en Ist/heure (abandonné après test)
 - [x] v2 : comptage uniques / sets / runes par heure, comparaison des routes
 - [x] v3 : personnages (classe, spé, MF) et verdict entre personnages
+- [x] v4 : routes custom (enchaînement d'étapes dans une partie)
+- [ ] Détail par étape d'une route custom (quel boss a lâché quoi)
 - [ ] Export / import des sessions (JSON) pour les partager
 - [ ] Graphique d'évolution par session
 - [ ] Bouton « unique élite » (base visible avant identification)

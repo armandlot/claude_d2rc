@@ -16,6 +16,13 @@ export default function Help() {
         les sessions lui sont rattachées, ce qui permet de comparer vos personnages entre eux.
       </p>
 
+      <h3>Routes custom</h3>
+      <p>
+        Dans l'onglet Routes, enchaînez plusieurs boss ou zones faits dans la même partie, par exemple Pindleskin →
+        Mephisto → Summoner → Andariel. La route apparaît ensuite dans la Session et la Comparaison, face aux routes
+        classiques. Un run = une partie complète : cliquez « +1 run » une seule fois, après la dernière étape.
+      </p>
+
       <h3>Pendant le farm</h3>
       <ol>
         <li>

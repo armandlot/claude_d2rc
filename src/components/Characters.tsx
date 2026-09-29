@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { CLASSES, CLASSES_BY_ID, type ClassId } from "../data/classes";
-import { ROUTES_BY_ID } from "../data/routes";
+import type { Route } from "../data/routes";
 import { characterLabel, newCharacterId, type Character } from "../lib/characters";
 import { aggregateSessions, perHour, type SavedSession } from "../lib/stats";
 import { formatDuration, formatRate } from "../format";
 
 interface Props {
   characters: Character[];
+  routes: Record<string, Route>;
   sessions: SavedSession[];
   onSave: (character: Character) => void;
   onDelete: (id: string) => void;
@@ -15,7 +16,7 @@ interface Props {
 
 const OTHER = "__other";
 
-export default function Characters({ characters, sessions, onSave, onDelete, onPlay }: Props) {
+export default function Characters({ characters, routes, sessions, onSave, onDelete, onPlay }: Props) {
   const [editing, setEditing] = useState<Character | null>(characters.length === 0 ? blank() : null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
@@ -69,7 +70,7 @@ export default function Characters({ characters, sessions, onSave, onDelete, onP
                   <dt>Meilleure route</dt>
                   <dd>
                     {best
-                      ? `${ROUTES_BY_ID[best.routeId]?.name ?? best.routeId} · ${formatRate(perHour(best.counts.unique, best.durationSeconds))} uniq./h`
+                      ? `${routes[best.routeId]?.name ?? "Route supprimée"} · ${formatRate(perHour(best.counts.unique, best.durationSeconds))} uniq./h`
                       : "—"}
                   </dd>
                 </div>

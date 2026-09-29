@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { characterLabel, type Character } from "../lib/characters";
 import { DROP_CATEGORIES, RUNE_KINDS, CATEGORY_BY_KIND } from "../data/drops";
-import { ROUTES, ROUTES_BY_ID } from "../data/routes";
+import { ROUTES, type Route } from "../data/routes";
+import { customRouteName, stopsLabel, type CustomRoute } from "../lib/customRoutes";
 import { usePersistentState } from "../lib/storage";
 import {
   perHour,
@@ -23,6 +24,8 @@ interface ActiveSession extends SessionSetup {
 
 interface Props {
   characters: Character[];
+  customRoutes: CustomRoute[];
+  routes: Record<string, Route>;
   setup: SessionSetup;
   onSetupChange: (setup: SessionSetup) => void;
   onSave: (session: SavedSession) => void;
@@ -36,7 +39,7 @@ const EVENT_LABEL: Record<EventType, string> = {
   ...(Object.fromEntries(DROP_CATEGORIES.map((c) => [c.kind, c.label])) as Record<Exclude<EventType, "run">, string>),
 };
 
-export default function SessionTracker({ characters, setup, onSetupChange, onSave, onCharacterMagicFind, onCreateCharacter }: Props) {
+export default function SessionTracker({ characters, customRoutes, routes, setup, onSetupChange, onSave, onCharacterMagicFind, onCreateCharacter }: Props) {
   const [active, setActive] = usePersistentState<ActiveSession | null>("v3:active-session", null);
   const [now, setNow] = useState(() => Date.now());
 
@@ -99,10 +102,13 @@ export default function SessionTracker({ characters, setup, onSetupChange, onSav
     }
     // Personnage sélectionné encore existant, sinon le premier.
     const current = characters.find((c) => c.id === setup.characterId) ?? characters[0];
-    const effective = current.id === setup.characterId ? setup : { ...setup, characterId: current.id, magicFind: current.magicFind };
+    let effective = current.id === setup.characterId ? setup : { ...setup, characterId: current.id, magicFind: current.magicFind };
+    // Route supprimée entre-temps : on revient à la première route classique.
+    if (!routes[effective.routeId]) effective = { ...effective, routeId: ROUTES[0].id };
     return (
       <SetupForm
         characters={characters}
+        customRoutes={customRoutes}
         setup={effective}
         onChange={onSetupChange}
         onStart={() => {
@@ -141,7 +147,10 @@ export default function SessionTracker({ characters, setup, onSetupChange, onSav
     <div className="session">
       <section className="panel session-head">
         <div>
-          <h2>{ROUTES_BY_ID[active.routeId]?.name ?? active.routeId}</h2>
+          <h2>{routes[active.routeId]?.name ?? "Route supprimée"}</h2>
+          {routes[active.routeId]?.stops && routes[active.routeId].name !== stopsLabel(routes[active.routeId].stops!) && (
+            <p className="hint stops-line">{stopsLabel(routes[active.routeId].stops!)}</p>
+          )}
           <p className="hint">
             {character ? characterLabel(character) : "Personnage supprimé"} · {active.magicFind} % MF · joueurs {active.players}
           </p>
@@ -221,11 +230,13 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: str
 
 function SetupForm({
   characters,
+  customRoutes,
   setup,
   onChange,
   onStart,
 }: {
   characters: Character[];
+  customRoutes: CustomRoute[];
   setup: SessionSetup;
   onChange: (s: SessionSetup) => void;
   onStart: () => void;
@@ -255,12 +266,23 @@ function SetupForm({
         </label>
         <label>
           Route
-          <select value={setup.routeId} onChange={(e) => update({ routeId: e.target.value })}>
-            {ROUTES.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
+          <select id="setup-route" value={setup.routeId} onChange={(e) => update({ routeId: e.target.value })}>
+            {customRoutes.length > 0 && (
+              <optgroup label="Mes routes custom">
+                {customRoutes.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {customRouteName(r)}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            <optgroup label="Routes classiques">
+              {ROUTES.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
         <label>

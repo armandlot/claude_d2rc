@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { CLASSES_BY_ID } from "../data/classes";
 import { DROP_CATEGORIES, RUNE_KINDS } from "../data/drops";
-import { ROUTES_BY_ID } from "../data/routes";
+import type { Route } from "../data/routes";
 import { characterLabel, type Character } from "../lib/characters";
 import {
   aggregateSessions,
@@ -26,21 +26,22 @@ const RELIABILITY: Record<Reliability, { label: string; title: string }> = {
 
 interface Props {
   characters: Character[];
+  routes: Record<string, Route>;
   sessions: SavedSession[];
   onDelete: (id: string) => void;
 }
 
-export default function Comparison({ characters, sessions, onDelete }: Props) {
+export default function Comparison({ characters, routes, sessions, onDelete }: Props) {
   const [characterFilter, setCharacterFilter] = useState("all");
   const [metric, setMetric] = useState<Metric>("unique");
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const byId = useMemo(() => Object.fromEntries(characters.map((c) => [c.id, c])), [characters]);
-  const known = sessions.filter((s) => byId[s.characterId]);
+  const known = sessions.filter((s) => byId[s.characterId] && routes[s.routeId]);
   const filtered = characterFilter === "all" ? known : known.filter((s) => s.characterId === characterFilter);
   const rate = (g: RouteAggregate) => perHour(metricCount(g.counts, metric), g.durationSeconds);
   const rows = aggregateSessions(filtered).sort((a, b) => rate(b) - rate(a));
-  const contenders: Contender[] = rows.map((g) => ({ character: byId[g.characterId], route: ROUTES_BY_ID[g.routeId], aggregate: g }));
+  const contenders: Contender[] = rows.map((g) => ({ character: byId[g.characterId], route: routes[g.routeId], aggregate: g }));
 
   if (known.length === 0) {
     return (
@@ -111,7 +112,10 @@ export default function Comparison({ characters, sessions, onDelete }: Props) {
                 return (
                   <tr key={g.key}>
                     <td>
-                      <div className="route-name">{ROUTES_BY_ID[g.routeId]?.name ?? g.routeId}</div>
+                      <div className="route-name">
+                        {routes[g.routeId].name}
+                        {routes[g.routeId].stops && <span className="badge">custom</span>}
+                      </div>
                       <small className={`who c-${c.classId}`}>
                         {characterLabel(c)} · {g.mfMin === g.mfMax ? `${g.mfMin} %` : `${g.mfMin}–${g.mfMax} %`} MF
                       </small>
@@ -175,7 +179,7 @@ export default function Comparison({ characters, sessions, onDelete }: Props) {
                     <br />
                     <small className="hint">{characterLabel(byId[s.characterId])}</small>
                   </td>
-                  <td>{ROUTES_BY_ID[s.routeId]?.name ?? s.routeId}</td>
+                  <td>{routes[s.routeId].name}</td>
                   <td className="num">{s.magicFind}</td>
                   <td className="num">{formatDuration(s.durationSeconds)}</td>
                   <td className="num">{s.runs}</td>

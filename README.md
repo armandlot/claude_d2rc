@@ -12,6 +12,9 @@ quelle que soit leur valeur.
   raccourcis clavier. Taux par heure en direct.
 - **Personnages** : créez vos personnages (classe, spécialisation, Magic Find,
   nom en jeu). Chaque session leur est rattachée.
+- **Routes** : créez vos routes custom en enchaînant des boss ou zones dans
+  une même partie (ex. Pindleskin → Mephisto → Summoner → Andariel), avec un
+  nom facultatif. Elles se comparent aux routes classiques.
 - **Comparaison** : classement des combinaisons personnage + route (uniques/h,
   sets/h, runes/h par groupe), indicateur de fiabilité, et un **verdict** en
   toutes lettres, par exemple : « Avec ta Sorcière Météorb, le clear des Terror
@@ -44,9 +47,9 @@ npm run build    # build de production dans dist/
 
 ```
 src/
-  data/           # classes et spés, routes, catégories de drops
-  lib/            # statistiques, personnages, verdicts (purs, testés) + persistance
-  components/     # onglets Session, Comparaison, Personnages, Aide
+  data/           # classes et spés, routes, étapes, catégories de drops
+  lib/            # statistiques, personnages, routes custom, verdicts (purs, testés) + persistance
+  components/     # onglets Session, Comparaison, Personnages, Routes, Aide
 .github/workflows # CI (tests + build) et déploiement GitHub Pages
 docs/DESIGN.md    # démarche de conception
 ```

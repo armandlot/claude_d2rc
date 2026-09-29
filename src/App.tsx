@@ -1,19 +1,22 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ROUTES } from "./data/routes";
 import { usePersistentState } from "./lib/storage";
 import { migrateLegacySessions, type Character } from "./lib/characters";
+import { routeIndex, type CustomRoute } from "./lib/customRoutes";
 import type { SavedSession, SessionSetup } from "./lib/stats";
 import SessionTracker from "./components/SessionTracker";
 import Comparison from "./components/Comparison";
 import Characters from "./components/Characters";
+import RoutesManager from "./components/RoutesManager";
 import Help from "./components/Help";
 
-type Tab = "session" | "comparison" | "characters" | "help";
+type Tab = "session" | "comparison" | "characters" | "routes" | "help";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "session", label: "Session" },
   { id: "comparison", label: "Comparaison" },
   { id: "characters", label: "Personnages" },
+  { id: "routes", label: "Routes" },
   { id: "help", label: "Aide" },
 ];
 
@@ -24,6 +27,8 @@ export default function App() {
   const [setup, setSetup] = usePersistentState<SessionSetup>("v3:setup", DEFAULT_SETUP);
   const [characters, setCharacters] = usePersistentState<Character[]>("v3:characters", []);
   const [sessions, setSessions] = usePersistentState<SavedSession[]>("v2:sessions", []);
+  const [customRoutes, setCustomRoutes] = usePersistentState<CustomRoute[]>("v4:custom-routes", []);
+  const routes = useMemo(() => routeIndex(customRoutes), [customRoutes]);
   const current = TABS.some((t) => t.id === tab) ? tab : "session";
 
   // Reprise des sessions v2 (liées à un build) : un personnage est créé par build.
@@ -59,6 +64,7 @@ export default function App() {
               {t.label}
               {t.id === "comparison" && sessions.length > 0 && <span className="tab-count">{sessions.length}</span>}
               {t.id === "characters" && characters.length > 0 && <span className="tab-count">{characters.length}</span>}
+              {t.id === "routes" && customRoutes.length > 0 && <span className="tab-count">{customRoutes.length}</span>}
             </button>
           ))}
         </nav>
@@ -68,6 +74,8 @@ export default function App() {
         {current === "session" && (
           <SessionTracker
             characters={characters}
+            customRoutes={customRoutes}
+            routes={routes}
             setup={setup}
             onSetupChange={setSetup}
             onSave={(s) => {
@@ -83,6 +91,7 @@ export default function App() {
         {current === "comparison" && (
           <Comparison
             characters={characters}
+            routes={routes}
             sessions={sessions}
             onDelete={(id) => setSessions((prev) => prev.filter((s) => s.id !== id))}
           />
@@ -90,6 +99,7 @@ export default function App() {
         {current === "characters" && (
           <Characters
             characters={characters}
+            routes={routes}
             sessions={sessions}
             onSave={(c) => {
               saveCharacter(c);
@@ -103,6 +113,24 @@ export default function App() {
             onPlay={(id) => {
               const c = characters.find((x) => x.id === id)!;
               setSetup({ ...setup, characterId: id, magicFind: c.magicFind });
+              setTab("session");
+            }}
+          />
+        )}
+        {current === "routes" && (
+          <RoutesManager
+            customRoutes={customRoutes}
+            characters={characters}
+            sessions={sessions}
+            onSave={(r) =>
+              setCustomRoutes((prev) => (prev.some((x) => x.id === r.id) ? prev.map((x) => (x.id === r.id ? r : x)) : [...prev, r]))
+            }
+            onDelete={(id) => {
+              setCustomRoutes((prev) => prev.filter((r) => r.id !== id));
+              setSessions((prev) => prev.filter((s) => s.routeId !== id));
+            }}
+            onPlay={(id) => {
+              setSetup({ ...setup, routeId: id });
               setTab("session");
             }}
           />

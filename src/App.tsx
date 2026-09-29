@@ -1,41 +1,26 @@
-import { useState } from "react";
 import { BUILDS } from "./data/builds";
-import { DEFAULT_SETTINGS, type PriceTable, type RunSettings } from "./lib/profitability";
+import { ROUTES } from "./data/routes";
 import { usePersistentState } from "./lib/storage";
-import Simulator from "./components/Simulator";
-import SessionTracker, { type SavedSession } from "./components/SessionTracker";
-import Prices from "./components/Prices";
-import Method from "./components/Method";
+import type { SavedSession, SessionSetup } from "./lib/stats";
+import SessionTracker from "./components/SessionTracker";
+import Comparison from "./components/Comparison";
+import Help from "./components/Help";
 
-type Tab = "simulator" | "session" | "prices" | "method";
+type Tab = "session" | "comparison" | "help";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "simulator", label: "Simulateur" },
   { id: "session", label: "Session" },
-  { id: "prices", label: "Prix" },
-  { id: "method", label: "Méthode" },
+  { id: "comparison", label: "Comparaison" },
+  { id: "help", label: "Aide" },
 ];
 
-/** Temps de run personnalisés, clé `${buildId}:${routeId}`. */
-export type RunTimeOverrides = Record<string, number>;
+const DEFAULT_SETUP: SessionSetup = { buildId: BUILDS[0].id, routeId: ROUTES[0].id, magicFind: 300, players: 1 };
 
 export default function App() {
-  const [tab, setTab] = usePersistentState<Tab>("tab", "simulator");
-  const [buildId, setBuildId] = usePersistentState("build", BUILDS[0].id);
-  const [settings, setSettings] = usePersistentState<RunSettings>("settings", DEFAULT_SETTINGS);
-  const [prices, setPrices] = usePersistentState<PriceTable>("prices", {});
-  const [overrides, setOverrides] = usePersistentState<RunTimeOverrides>("overrides", {});
-  const [sessions, setSessions] = usePersistentState<SavedSession[]>("sessions", []);
-  const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
-
-  const setOverride = (routeId: string, seconds: number | null, forBuild = buildId) =>
-    setOverrides((prev) => {
-      const next = { ...prev };
-      const key = `${forBuild}:${routeId}`;
-      if (seconds && seconds > 0) next[key] = seconds;
-      else delete next[key];
-      return next;
-    });
+  const [tab, setTab] = usePersistentState<Tab>("v2:tab", "session");
+  const [setup, setSetup] = usePersistentState<SessionSetup>("v2:setup", DEFAULT_SETUP);
+  const [sessions, setSessions] = usePersistentState<SavedSession[]>("v2:sessions", []);
+  const current = TABS.some((t) => t.id === tab) ? tab : "session";
 
   return (
     <div className="app">
@@ -43,54 +28,38 @@ export default function App() {
         <h1>
           D2R <span>Run Profit</span>
         </h1>
-        <p className="tagline">Quelle route farmer avec votre personnage ? Valeur estimée en runes Ist par heure.</p>
+        <p className="tagline">Comptez vos uniques, sets et runes par heure pour trouver votre meilleure route.</p>
         <nav className="tabs" role="tablist">
           {TABS.map((t) => (
             <button
               key={t.id}
               role="tab"
-              aria-selected={tab === t.id}
-              className={tab === t.id ? "tab active" : "tab"}
+              aria-selected={current === t.id}
+              className={current === t.id ? "tab active" : "tab"}
               onClick={() => setTab(t.id)}
             >
               {t.label}
+              {t.id === "comparison" && sessions.length > 0 && <span className="tab-count">{sessions.length}</span>}
             </button>
           ))}
         </nav>
       </header>
 
       <main>
-        {tab === "simulator" && (
-          <Simulator
-            buildId={buildId}
-            onBuildChange={setBuildId}
-            settings={settings}
-            onSettingsChange={setSettings}
-            prices={prices}
-            overrides={overrides}
-            onOverrideChange={setOverride}
-            selectedRoute={selectedRoute}
-            onSelectRoute={setSelectedRoute}
-          />
-        )}
-        {tab === "session" && (
+        {current === "session" && (
           <SessionTracker
-            buildId={buildId}
-            settings={settings}
-            prices={prices}
-            overrides={overrides}
-            sessions={sessions}
-            onSessionsChange={setSessions}
-            onUseRunTime={(sessionBuildId, routeId, seconds) => {
-              setOverride(routeId, seconds, sessionBuildId);
-              setBuildId(sessionBuildId);
-              setSelectedRoute(routeId);
-              setTab("simulator");
+            setup={setup}
+            onSetupChange={setSetup}
+            onSave={(s) => {
+              setSessions((prev) => [s, ...prev]);
+              setTab("comparison");
             }}
           />
         )}
-        {tab === "prices" && <Prices prices={prices} onChange={setPrices} />}
-        {tab === "method" && <Method />}
+        {current === "comparison" && (
+          <Comparison sessions={sessions} onDelete={(id) => setSessions((prev) => prev.filter((s) => s.id !== id))} />
+        )}
+        {current === "help" && <Help />}
       </main>
 
       <footer className="footer">

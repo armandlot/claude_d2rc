@@ -1,10 +1,3 @@
-export function formatIst(value: number): string {
-  if (value === 0) return "0";
-  if (Math.abs(value) < 0.01) return value.toFixed(4);
-  if (Math.abs(value) < 1) return value.toFixed(2);
-  return value.toFixed(value < 10 ? 2 : 1);
-}
-
 export function formatDuration(seconds: number): string {
   const s = Math.max(0, Math.round(seconds));
   const h = Math.floor(s / 3600);
@@ -15,6 +8,7 @@ export function formatDuration(seconds: number): string {
   return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 }
 
-export function formatPercent(value: number): string {
-  return `${Math.round(value * 100)} %`;
+/** Taux horaire lisible : 1 décimale sous 100. */
+export function formatRate(value: number): string {
+  return value >= 100 ? String(Math.round(value)) : value.toFixed(1).replace(".", ",");
 }

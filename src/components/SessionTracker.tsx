@@ -10,17 +10,21 @@ import {
   runeTotal,
   summarizeEvents,
   type EventType,
+  type IdentifiedItem,
   type SavedSession,
   type SessionEvent,
   type SessionSetup,
 } from "../lib/stats";
 import { formatDuration, formatRate } from "../format";
+import ItemLog from "./ItemLog";
 
 interface ActiveSession extends SessionSetup {
   startedAt: number;
   pausedAt: number | null;
   pausedTotalMs: number;
   events: SessionEvent[];
+  /** Objets identifiés en cours de session (entre deux runs). */
+  items?: IdentifiedItem[];
 }
 
 interface Props {
@@ -139,6 +143,7 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
         durationSeconds: Math.round(elapsed),
         runs,
         counts,
+        items: active.items ?? [],
       });
     }
     setActive(null);
@@ -209,6 +214,21 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
           avant identification.
         </p>
       </section>
+
+      <details className="panel identify" open={(active.items?.length ?? 0) > 0}>
+        <summary>
+          <h2>
+            Objets identifiés {active.items?.length ? <span className="tab-count">{active.items.length}</span> : null}
+          </h2>
+          <span className="hint">Entre deux runs ou à la fin : identifiez vos drops et vérifiez leur prix sur Traderie.</span>
+        </summary>
+        <ItemLog
+          inputId="session-item"
+          items={active.items ?? []}
+          character={character}
+          onChange={(items) => setActive((a) => (a ? { ...a, items } : a))}
+        />
+      </details>
     </div>
   );
 }

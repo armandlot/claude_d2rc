@@ -15,10 +15,12 @@ import {
   type Metric,
   type Reliability,
   type RouteAggregate,
+  type IdentifiedItem,
   type SavedSession,
 } from "../lib/stats";
 import { buildVerdict, METRICS, type Contender } from "../lib/verdict";
 import { formatDuration, formatRate } from "../format";
+import Review from "./Review";
 
 const RELIABILITY: Record<Reliability, { label: string; title: string }> = {
   good: { label: "fiable", title: "30 uniques + sets ou plus" },
@@ -31,9 +33,13 @@ interface Props {
   routes: Record<string, Route>;
   sessions: SavedSession[];
   onDelete: (id: string) => void;
+  /** Session en cours de revue (objets identifiés), ou null. */
+  reviewId: string | null;
+  onReview: (id: string | null) => void;
+  onItemsChange: (sessionId: string, items: IdentifiedItem[]) => void;
 }
 
-export default function Comparison({ characters, routes, sessions, onDelete }: Props) {
+export default function Comparison({ characters, routes, sessions, onDelete, reviewId, onReview, onItemsChange }: Props) {
   const [characterFilter, setCharacterFilter] = useState("all");
   const [metric, setMetric] = useState<Metric>("unique");
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -62,8 +68,19 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
 
   const best = rows[0] ? rate(rows[0]) || 1 : 1;
 
+  const reviewed = reviewId ? sessions.find((s) => s.id === reviewId) : undefined;
+
   return (
     <div className="stack">
+      {reviewed && (
+        <Review
+          session={reviewed}
+          character={byId[reviewed.characterId]}
+          route={routes[reviewed.routeId]}
+          onItemsChange={(items) => onItemsChange(reviewed.id, items)}
+          onClose={() => onReview(null)}
+        />
+      )}
       <section className="panel">
         <div className="toolbar">
           <h2>Classement</h2>
@@ -193,6 +210,7 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
                 <th className="num q-set">Sets</th>
                 <th className="num q-rune">Runes</th>
                 <th className="num q-magic">Charmes</th>
+                <th>Objets identifiés</th>
                 <th />
               </tr>
             </thead>
@@ -212,6 +230,17 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
                   <td className="num">{s.counts.set}</td>
                   <td className="num">{runeTotal(s.counts)}</td>
                   <td className="num">{s.counts.charm_small === undefined ? "—" : charmTotal(s.counts)}</td>
+                  <td>
+                    <button
+                      className="link"
+                      onClick={() => {
+                        onReview(s.id);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
+                      {s.items?.length ? `${s.items.length} objet${s.items.length > 1 ? "s" : ""}` : "Identifier"}
+                    </button>
+                  </td>
                   <td className="num">
                     {confirmId === s.id ? (
                       <>

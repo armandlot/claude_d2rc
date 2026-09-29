@@ -17,7 +17,18 @@ export interface SessionSetup {
   players: number;
 }
 
+/** Objet identifié en jeu après coup, avec la valeur relevée sur Traderie. */
+export interface IdentifiedItem {
+  id: string;
+  /** Nom anglais de l'objet (sert à construire le lien Traderie). */
+  name: string;
+  /** Valeur notée par le joueur, texte libre (« 2 Ist », « 1 Ber »…). */
+  value: string;
+}
+
 export interface SavedSession extends SessionSetup {
+  /** Objets identifiés (absent pour les sessions antérieures à cette fonction). */
+  items?: IdentifiedItem[];
   id: string;
   date: string;
   durationSeconds: number;

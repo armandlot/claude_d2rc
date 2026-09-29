@@ -72,6 +72,15 @@ export default function Help() {
         Les charmes uniques (Gheed's Fortune, Annihilus, Hellfire Torch) sont dorés : comptez-les avec « Unique ».
       </p>
 
+      <h3>Identifier ses drops et voir leur prix</h3>
+      <p>
+        Entre deux runs (panneau « Objets identifiés » de la session) ou à la fin (la revue s'ouvre automatiquement),
+        saisissez le nom anglais de chaque objet identifié en jeu. L'application crée un lien vers les échanges
+        vérifiés récents sur Traderie, filtrés sur le mode et le royaume du personnage. Notez la valeur trouvée à côté
+        de l'objet : elle reste enregistrée avec la session. Le lien « Identifier » de chaque session enregistrée
+        rouvre cette revue.
+      </p>
+
       <h3>Lire la comparaison</h3>
       <ul>
         <li>Chaque taux = nombre de drops ÷ temps de jeu hors pause × 3 600.</li>

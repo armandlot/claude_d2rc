@@ -1153,3 +1153,112 @@ select {
   color: var(--magic);
 }
 .muted-cell { color: var(--muted); }
+
+/* ---- objets identifiés / Traderie ---- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.add-item {
+  display: flex;
+  gap: 8px;
+}
+
+.add-item input {
+  flex: 1;
+}
+
+.items {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 6px;
+}
+
+.items li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 140px auto;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+
+.item-name {
+  color: var(--gold-strong);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.traderie {
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.traderie:hover {
+  border-color: var(--gold);
+}
+
+@media (max-width: 600px) {
+  .items li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .items .item-value {
+    grid-column: 1;
+  }
+}
+
+.review {
+  border-top: 3px solid var(--gold);
+}
+
+.review-todo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 12px;
+}
+
+.identify summary {
+  cursor: pointer;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.identify summary::-webkit-details-marker {
+  display: none;
+}
+
+.identify summary h2 {
+  margin: 0;
+}
+
+.identify summary h2::before {
+  content: "▸ ";
+  color: var(--muted);
+}
+
+.identify[open] summary h2::before {
+  content: "▾ ";
+}
+
+.identify[open] summary {
+  margin-bottom: 12px;
+}
+.review-label { margin: 0; font-size: 13px; color: var(--muted); }
+.review-todo .badge { border-color: var(--c); color: var(--c); }

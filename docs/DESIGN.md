@@ -65,8 +65,23 @@ plus**.
   « la route « Tour MF » est plus efficace que les runs Chaos »).
 - Supprimer une route supprime ses sessions (après confirmation).
 
+### Objets identifiés et prix Traderie (v5)
+
+- Pendant la session (entre deux runs) ou dans la revue ouverte à la fin, le
+  joueur saisit le nom anglais de chaque objet identifié (autocomplétion,
+  `src/data/itemCatalog.ts`) et note sa valeur en texte libre.
+- Lien généré (`src/lib/traderie.ts`) :
+  `https://traderie.com/diablo2resurrected/product/<slug>/recent?prop_Mode=<softcore|hardcore>&prop_Ladder=<true|false>&prop_Game%20version=reign%20of%20the%20warlock`
+  - slug : nom en minuscules, apostrophes retirées, espaces → tirets ;
+  - `recent` : échanges vérifiés récents, le plus fiable pour estimer un prix ;
+  - mode et ladder : ceux du personnage de la session ;
+  - version du jeu : constante `DEFAULT_GAME_VERSION`, en attendant d'en faire
+    un champ du personnage.
+- Les objets restent enregistrés avec la session ; le lien « Identifier » d'une
+  session enregistrée rouvre sa revue.
+
 Les statistiques (`src/lib/stats.ts`), personnages (`characters.ts`), routes
-custom (`customRoutes.ts`) et verdicts (`verdict.ts`) sont des fonctions pures, couvertes par des tests.
+custom (`customRoutes.ts`) et verdicts (`verdict.ts`), traderie (`traderie.ts`) sont des fonctions pures, couvertes par des tests.
 
 ## 4. Choix techniques
 
@@ -86,6 +101,8 @@ custom (`customRoutes.ts`) et verdicts (`verdict.ts`) sont des fonctions pures, 
 - [x] v3 : personnages (classe, spé, MF) et verdict entre personnages
 - [x] v4 : routes custom (enchaînement d'étapes dans une partie)
 - [ ] Détail par étape d'une route custom (quel boss a lâché quoi)
+- [x] v5 : objets identifiés et lien de prix Traderie
+- [ ] Version du jeu dans la fiche du personnage (paramètre Traderie)
 - [ ] Export / import des sessions (JSON) pour les partager
 - [ ] Graphique d'évolution par session
 - [ ] Bouton « unique élite » (base visible avant identification)

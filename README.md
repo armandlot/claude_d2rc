@@ -21,6 +21,11 @@ quelle que soit leur valeur.
   toutes lettres, par exemple : « Avec ta Sorcière Météorb, le clear des Terror
   Zones est plus efficace que les runs Chaos avec ton Paladin Marteau », avec
   un test statistique qui dit si l'écart est significatif.
+- **Objets identifiés et prix** : entre deux runs ou à la fin d'une session
+  (revue automatique), saisissez le nom anglais de chaque objet identifié ;
+  l'application génère un lien vers les échanges vérifiés récents sur
+  **Traderie**, filtré sur le mode (Softcore/Hardcore) et le royaume
+  (Ladder/Non-ladder) du personnage. La valeur relevée se note à côté.
 - **Aide** : mode d'emploi, raccourcis et groupes de runes.
 
 Groupes de runes (Ladder) :

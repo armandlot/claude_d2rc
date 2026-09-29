@@ -32,6 +32,7 @@ export default function App() {
   const [customRoutes, setCustomRoutes] = usePersistentState<CustomRoute[]>("v4:custom-routes", []);
   const routes = useMemo(() => routeIndex(customRoutes), [customRoutes]);
   const current = TABS.some((t) => t.id === tab) ? tab : "session";
+  const [reviewId, setReviewId] = usePersistentState<string | null>("v5:review", null);
 
   // Reprise des sessions v2 (liées à un build) : un personnage est créé par build.
   const migrated = useRef(false);
@@ -82,6 +83,8 @@ export default function App() {
             onSetupChange={setSetup}
             onSave={(s) => {
               setSessions((prev) => [s, ...prev]);
+              // Fin de session : on enchaîne sur la revue des drops.
+              setReviewId(s.id);
               setTab("comparison");
             }}
             onCharacterMagicFind={(id, magicFind) =>
@@ -96,6 +99,9 @@ export default function App() {
             routes={routes}
             sessions={sessions}
             onDelete={(id) => setSessions((prev) => prev.filter((s) => s.id !== id))}
+            reviewId={reviewId}
+            onReview={setReviewId}
+            onItemsChange={(id, items) => setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, items } : s)))}
           />
         )}
         {current === "characters" && (

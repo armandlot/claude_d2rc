@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   aggregateSessions,
+  compareRates,
   emptyCounts,
   perHour,
   perHourMargin,
@@ -57,7 +58,7 @@ describe("aggregateSessions", () => {
   const session = (id: string, routeId: string, uniques: number, mf: number): SavedSession => ({
     id,
     date: "2026-09-29T10:00:00Z",
-    buildId: "blizzard_sorc",
+    characterId: "sorc",
     routeId,
     magicFind: mf,
     players: 1,
@@ -66,7 +67,7 @@ describe("aggregateSessions", () => {
     counts: { ...emptyCounts(), unique: uniques },
   });
 
-  it("regroupe par build + route et cumule", () => {
+  it("regroupe par personnage + route et cumule", () => {
     const groups = aggregateSessions([
       session("a", "mephisto", 3, 300),
       session("b", "mephisto", 5, 450),
@@ -79,5 +80,22 @@ describe("aggregateSessions", () => {
     expect(meph.durationSeconds).toBe(3600);
     expect(meph.counts.unique).toBe(8);
     expect([meph.mfMin, meph.mfMax]).toEqual([300, 450]);
+  });
+});
+
+describe("compareRates", () => {
+  it("calcule l'écart relatif", () => {
+    const c = compareRates(30, 3600, 20, 3600);
+    expect(c.rateA).toBe(30);
+    expect(c.rateB).toBe(20);
+    expect(c.relative).toBeCloseTo(0.5);
+  });
+
+  it("ne déclare pas significatif un écart sur peu de drops", () => {
+    expect(compareRates(6, 1800, 4, 1800).significant).toBe(false);
+  });
+
+  it("déclare significatif un écart net sur beaucoup de drops", () => {
+    expect(compareRates(120, 3600 * 4, 60, 3600 * 4).significant).toBe(true);
   });
 });

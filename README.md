@@ -10,8 +10,13 @@ quelle que soit leur valeur.
 - **Session** : chronomètre, gros boutons « +1 run », « Unique », « Set » et un
   bouton par groupe de runes, annulation de la dernière action, pause,
   raccourcis clavier. Taux par heure en direct.
-- **Comparaison** : classement de vos routes par personnage (uniques/h,
-  sets/h, runes/h par groupe), avec un indicateur de fiabilité statistique.
+- **Personnages** : créez vos personnages (classe, spécialisation, Magic Find,
+  nom en jeu). Chaque session leur est rattachée.
+- **Comparaison** : classement des combinaisons personnage + route (uniques/h,
+  sets/h, runes/h par groupe), indicateur de fiabilité, et un **verdict** en
+  toutes lettres, par exemple : « Avec ta Sorcière Météorb, le clear des Terror
+  Zones est plus efficace que les runs Chaos avec ton Paladin Marteau », avec
+  un test statistique qui dit si l'écart est significatif.
 - **Aide** : mode d'emploi, raccourcis et groupes de runes.
 
 Groupes de runes (Ladder) :
@@ -39,9 +44,9 @@ npm run build    # build de production dans dist/
 
 ```
 src/
-  data/           # personnages, routes, catégories de drops
-  lib/            # statistiques (pur, testé) + persistance
-  components/     # onglets Session, Comparaison, Aide
+  data/           # classes et spés, routes, catégories de drops
+  lib/            # statistiques, personnages, verdicts (purs, testés) + persistance
+  components/     # onglets Session, Comparaison, Personnages, Aide
 .github/workflows # CI (tests + build) et déploiement GitHub Pages
 docs/DESIGN.md    # démarche de conception
 ```

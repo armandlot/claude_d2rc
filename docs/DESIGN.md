@@ -17,7 +17,7 @@ me rapporte le plus par heure de jeu ? »*. La réponse dépend de :
 ## 2. Utilisateurs et cas d'usage
 
 1. **Mesurer une session réelle** : chronométrer, compter uniques, sets et runes sans quitter le jeu des yeux.
-2. **Comparer ses routes** : « Avec ma Blizzard Sorc à 400 MF, Pit ou Mephisto ? »
+2. **Comparer ses routes et ses personnages** : « Terror Zones avec ma Sorcière Météorb, ou Chaos avec mon Paladin Marteau ? »
 3. **Savoir quand conclure** : l'indicateur de fiabilité dit si l'écart observé est significatif.
 
 ## 3. Modèle de mesure (v2)
@@ -37,7 +37,19 @@ plus**.
 - La MF et /players sont enregistrés avec chaque session pour comparer à
   conditions égales.
 
-Les statistiques (`src/lib/stats.ts`) sont des fonctions pures, couvertes par des tests.
+### Personnages et verdict (v3)
+
+- Un personnage = classe + spécialisation + Magic Find (+ nom en jeu facultatif).
+  La MF saisie au lancement d'une session met à jour celle du personnage.
+- Le verdict compare deux combinaisons personnage + route sur le critère choisi.
+  Par défaut : la meilleure contre le meilleur résultat d'un **autre** personnage.
+- Significativité : test z sur deux taux de Poisson,
+  z = (rA − rB) / √(nA/hA² + nB/hB²), écart significatif si |z| ≥ 1,96 (95 %).
+- Les sessions v2, liées à un build, sont reprises automatiquement : un
+  personnage est créé par build rencontré.
+
+Les statistiques (`src/lib/stats.ts`), personnages (`characters.ts`) et
+verdicts (`verdict.ts`) sont des fonctions pures, couvertes par des tests.
 
 ## 4. Choix techniques
 
@@ -54,6 +66,7 @@ Les statistiques (`src/lib/stats.ts`) sont des fonctions pures, couvertes par de
 
 - [x] v1 : simulateur de valeur en Ist/heure (abandonné après test)
 - [x] v2 : comptage uniques / sets / runes par heure, comparaison des routes
+- [x] v3 : personnages (classe, spé, MF) et verdict entre personnages
 - [ ] Export / import des sessions (JSON) pour les partager
 - [ ] Graphique d'évolution par session
 - [ ] Bouton « unique élite » (base visible avant identification)

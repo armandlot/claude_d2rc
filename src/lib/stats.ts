@@ -11,7 +11,7 @@ export interface SessionEvent {
 }
 
 export interface SessionSetup {
-  buildId: string;
+  characterId: string;
   routeId: string;
   magicFind: number;
   players: number;
@@ -68,7 +68,7 @@ export function perHourMargin(count: number, seconds: number): number {
 
 export interface RouteAggregate {
   key: string;
-  buildId: string;
+  characterId: string;
   routeId: string;
   sessions: number;
   runs: number;
@@ -78,16 +78,16 @@ export interface RouteAggregate {
   mfMax: number;
 }
 
-/** Regroupe les sessions par couple build + route. */
+/** Regroupe les sessions par couple personnage + route. */
 export function aggregateSessions(sessions: SavedSession[]): RouteAggregate[] {
   const groups = new Map<string, RouteAggregate>();
   for (const s of sessions) {
-    const key = `${s.buildId}:${s.routeId}`;
+    const key = `${s.characterId}:${s.routeId}`;
     let g = groups.get(key);
     if (!g) {
       g = {
         key,
-        buildId: s.buildId,
+        characterId: s.characterId,
         routeId: s.routeId,
         sessions: 0,
         runs: 0,
@@ -106,4 +106,39 @@ export function aggregateSessions(sessions: SavedSession[]): RouteAggregate[] {
     g.mfMax = Math.max(g.mfMax, s.magicFind);
   }
   return [...groups.values()];
+}
+
+/** Critère de comparaison : une catégorie, toutes les runes, ou uniques + sets. */
+export type Metric = DropKind | "runes" | "uniques_sets";
+
+export function metricCount(counts: Counts, metric: Metric): number {
+  if (metric === "runes") return runeTotal(counts);
+  if (metric === "uniques_sets") return counts.unique + counts.set;
+  return counts[metric];
+}
+
+export interface RateComparison {
+  rateA: number;
+  rateB: number;
+  /** Écart relatif de A par rapport à B (0,5 = +50 %). */
+  relative: number;
+  /** Écart significatif à 95 % (test z sur deux taux de Poisson). */
+  significant: boolean;
+}
+
+/** Compare deux taux horaires observés : nA drops en tA secondes contre nB en tB. */
+export function compareRates(nA: number, tA: number, nB: number, tB: number): RateComparison {
+  const rateA = perHour(nA, tA);
+  const rateB = perHour(nB, tB);
+  const hA = tA / 3600;
+  const hB = tB / 3600;
+  // Variance d'un taux de Poisson = n / t² (au moins 1 drop pour éviter une variance nulle).
+  const se = hA > 0 && hB > 0 ? Math.sqrt(Math.max(nA, 1) / hA ** 2 + Math.max(nB, 1) / hB ** 2) : Infinity;
+  const z = (rateA - rateB) / se;
+  return {
+    rateA,
+    rateB,
+    relative: rateB > 0 ? rateA / rateB - 1 : rateA > 0 ? Infinity : 0,
+    significant: Math.abs(z) >= 1.96,
+  };
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { BUILDS, BUILDS_BY_ID } from "../data/builds";
+import { characterLabel, type Character } from "../lib/characters";
 import { DROP_CATEGORIES, RUNE_KINDS, CATEGORY_BY_KIND } from "../data/drops";
 import { ROUTES, ROUTES_BY_ID } from "../data/routes";
 import { usePersistentState } from "../lib/storage";
@@ -22,9 +22,13 @@ interface ActiveSession extends SessionSetup {
 }
 
 interface Props {
+  characters: Character[];
   setup: SessionSetup;
   onSetupChange: (setup: SessionSetup) => void;
   onSave: (session: SavedSession) => void;
+  /** La MF saisie au démarrage diffère de celle du personnage : on la met à jour. */
+  onCharacterMagicFind: (characterId: string, magicFind: number) => void;
+  onCreateCharacter: () => void;
 }
 
 const EVENT_LABEL: Record<EventType, string> = {
@@ -32,8 +36,8 @@ const EVENT_LABEL: Record<EventType, string> = {
   ...(Object.fromEntries(DROP_CATEGORIES.map((c) => [c.kind, c.label])) as Record<Exclude<EventType, "run">, string>),
 };
 
-export default function SessionTracker({ setup, onSetupChange, onSave }: Props) {
-  const [active, setActive] = usePersistentState<ActiveSession | null>("v2:active-session", null);
+export default function SessionTracker({ characters, setup, onSetupChange, onSave, onCharacterMagicFind, onCreateCharacter }: Props) {
+  const [active, setActive] = usePersistentState<ActiveSession | null>("v3:active-session", null);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -82,8 +86,33 @@ export default function SessionTracker({ setup, onSetupChange, onSave }: Props) 
   }, [active, add, undo, togglePause]);
 
   if (!active) {
-    return <SetupForm setup={setup} onChange={onSetupChange} onStart={() => setActive({ ...setup, startedAt: Date.now(), pausedAt: null, pausedTotalMs: 0, events: [] })} />;
+    if (characters.length === 0) {
+      return (
+        <section className="panel empty">
+          <h2>Créez d'abord un personnage</h2>
+          <p className="hint">Chaque session est rattachée à un de vos personnages : classe, spécialisation et Magic Find.</p>
+          <button className="primary big" onClick={onCreateCharacter}>
+            Créer un personnage
+          </button>
+        </section>
+      );
+    }
+    // Personnage sélectionné encore existant, sinon le premier.
+    const current = characters.find((c) => c.id === setup.characterId) ?? characters[0];
+    const effective = current.id === setup.characterId ? setup : { ...setup, characterId: current.id, magicFind: current.magicFind };
+    return (
+      <SetupForm
+        characters={characters}
+        setup={effective}
+        onChange={onSetupChange}
+        onStart={() => {
+          if (effective.magicFind !== current.magicFind) onCharacterMagicFind(current.id, effective.magicFind);
+          setActive({ ...effective, startedAt: Date.now(), pausedAt: null, pausedTotalMs: 0, events: [] });
+        }}
+      />
+    );
   }
+  const character = characters.find((c) => c.id === active.characterId);
 
   const elapsed = Math.max(0, ((active.pausedAt ?? now) - active.startedAt - active.pausedTotalMs) / 1000);
   const { runs, counts } = summarizeEvents(active.events);
@@ -96,7 +125,7 @@ export default function SessionTracker({ setup, onSetupChange, onSave }: Props) 
       onSave({
         id: String(Date.now()),
         date: new Date(active.startedAt).toISOString(),
-        buildId: active.buildId,
+        characterId: active.characterId,
         routeId: active.routeId,
         magicFind: active.magicFind,
         players: active.players,
@@ -114,7 +143,7 @@ export default function SessionTracker({ setup, onSetupChange, onSave }: Props) 
         <div>
           <h2>{ROUTES_BY_ID[active.routeId]?.name ?? active.routeId}</h2>
           <p className="hint">
-            {BUILDS_BY_ID[active.buildId]?.name ?? active.buildId} · {active.magicFind} % MF · joueurs {active.players}
+            {character ? characterLabel(character) : "Personnage supprimé"} · {active.magicFind} % MF · joueurs {active.players}
           </p>
         </div>
         <div className={active.pausedAt ? "timer paused" : "timer"} aria-live="off">
@@ -190,7 +219,18 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: str
   );
 }
 
-function SetupForm({ setup, onChange, onStart }: { setup: SessionSetup; onChange: (s: SessionSetup) => void; onStart: () => void }) {
+function SetupForm({
+  characters,
+  setup,
+  onChange,
+  onStart,
+}: {
+  characters: Character[];
+  setup: SessionSetup;
+  onChange: (s: SessionSetup) => void;
+  onStart: () => void;
+}) {
+  const character = characters.find((c) => c.id === setup.characterId);
   const update = (patch: Partial<SessionSetup>) => onChange({ ...setup, ...patch });
   return (
     <section className="panel setup">
@@ -198,10 +238,17 @@ function SetupForm({ setup, onChange, onStart }: { setup: SessionSetup; onChange
       <div className="setup-grid">
         <label>
           Personnage
-          <select value={setup.buildId} onChange={(e) => update({ buildId: e.target.value })}>
-            {BUILDS.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
+          <select
+            id="setup-character"
+            value={setup.characterId}
+            onChange={(e) => {
+              const next = characters.find((c) => c.id === e.target.value)!;
+              update({ characterId: next.id, magicFind: next.magicFind });
+            }}
+          >
+            {characters.map((c) => (
+              <option key={c.id} value={c.id}>
+                {characterLabel(c)}
               </option>
             ))}
           </select>
@@ -241,7 +288,10 @@ function SetupForm({ setup, onChange, onStart }: { setup: SessionSetup; onChange
       <button className="primary big" onClick={onStart}>
         Démarrer le chrono
       </button>
-      <p className="hint">La MF et /players sont enregistrés avec la session : ils influencent les uniques et les sets.</p>
+      <p className="hint">
+        La MF et /players sont enregistrés avec la session : ils influencent les uniques et les sets.
+        {character && setup.magicFind !== character.magicFind && " La MF du personnage sera mise à jour au démarrage."}
+      </p>
     </section>
   );
 }

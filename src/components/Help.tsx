@@ -10,9 +10,18 @@ export default function Help() {
         <span className="q-set">sets</span> dès qu'ils tombent, avant identification, et les runes par groupe.
       </p>
 
+      <h3>Vos personnages</h3>
+      <p>
+        Dans l'onglet Personnages, créez chaque personnage que vous farmez : classe, spécialisation et Magic Find. Toutes
+        les sessions lui sont rattachées, ce qui permet de comparer vos personnages entre eux.
+      </p>
+
       <h3>Pendant le farm</h3>
       <ol>
-        <li>Onglet Session : choisissez personnage, route, Magic Find et /players, puis « Démarrer le chrono ».</li>
+        <li>
+          Onglet Session : choisissez le personnage, la route et /players, puis « Démarrer le chrono ». Si votre MF a
+          changé, corrigez-la : elle sera mise à jour sur le personnage.
+        </li>
         <li>À la fin de chaque partie : « +1 run ».</li>
         <li>À chaque drop : le bouton correspondant. Une erreur ? « Annuler ».</li>
         <li>Une pause (pipi, commerce) : « Pause ». Le temps en pause n'est pas compté.</li>
@@ -54,6 +63,11 @@ export default function Help() {
       <ul>
         <li>Chaque taux = nombre de drops ÷ temps de jeu hors pause × 3 600.</li>
         <li>Les sessions d'un même personnage sur une même route sont cumulées.</li>
+        <li>
+          Le verdict compare les deux meilleures combinaisons personnage + route, ou deux combinaisons que vous
+          choisissez. Il précise si l'écart est significatif (test statistique à 95 %) ou s'il peut encore venir du
+          hasard.
+        </li>
         <li>
           Les drops sont très aléatoires. La fiabilité se base sur le nombre d'uniques + sets observés : « trop peu »
           sous 10, « indicatif » de 10 à 29, « fiable » à partir de 30.

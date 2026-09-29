@@ -11,7 +11,6 @@ import {
   perHourMargin,
   reliability,
   runeTotal,
-  charmTotal,
   type Metric,
   type Reliability,
   type RouteAggregate,
@@ -49,7 +48,7 @@ export default function Comparison({ characters, routes, sessions, onDelete, rev
   const filtered = characterFilter === "all" ? known : known.filter((s) => s.characterId === characterFilter);
   const rate = (g: RouteAggregate) => metricRate(g, metric);
   const rows = aggregateSessions(filtered).sort((a, b) => rate(b) - rate(a));
-  // Le verdict n'oppose que des lignes où le critère était mesuré (ex. charmes absents des anciennes sessions).
+  // Le verdict n'oppose que des lignes où le critère était mesuré.
   const contenders: Contender[] = rows
     .filter((g) => metricSeconds(g, metric) > 0)
     .map((g) => ({ character: byId[g.characterId], route: routes[g.routeId], aggregate: g }));
@@ -110,8 +109,7 @@ export default function Comparison({ characters, routes, sessions, onDelete, rev
         {contenders.length >= 2 && <VerdictPanel contenders={contenders} metric={metric} />}
         {contenders.length < 2 && rows.length >= 2 && (
           <p className="hint">
-            Pas de verdict pour ce critère : il faut au moins deux combinaisons où il a été compté (les charmes ne sont
-            comptés que dans les sessions récentes).
+            Pas de verdict pour ce critère : il faut au moins deux combinaisons où il a été compté.
           </p>
         )}
 
@@ -125,7 +123,6 @@ export default function Comparison({ characters, routes, sessions, onDelete, rev
                 <th className="num">Moy.</th>
                 <th className="num q-unique">Uniq./h</th>
                 <th className="num q-set">Sets/h</th>
-                <th className="num q-magic">Charm./h</th>
                 {RUNE_KINDS.map((k) => (
                   <th key={k} className="num q-rune">
                     {DROP_CATEGORIES.find((c) => c.kind === k)!.short}/h
@@ -161,18 +158,6 @@ export default function Comparison({ characters, routes, sessions, onDelete, rev
                     <td className="num strong" title={`${g.counts.set} sets · ± ${formatRate(perHourMargin(g.counts.set, g.durationSeconds))} /h`}>
                       {formatRate(perHour(g.counts.set, g.durationSeconds))}
                     </td>
-                    {g.trackedSeconds.charm_small > 0 ? (
-                      <td
-                        className="num strong"
-                        title={`${g.counts.charm_small} SC · ${g.counts.charm_large} LC · ${g.counts.charm_grand} GC`}
-                      >
-                        {formatRate(metricRate(g, "charms"))}
-                      </td>
-                    ) : (
-                      <td className="num muted-cell" title="Sessions enregistrées avant le comptage des charmes">
-                        —
-                      </td>
-                    )}
                     {RUNE_KINDS.map((k) => (
                       <td key={k} className="num" title={`${g.counts[k]} au total`}>
                         {formatRate(perHour(g.counts[k], g.durationSeconds))}
@@ -209,7 +194,6 @@ export default function Comparison({ characters, routes, sessions, onDelete, rev
                 <th className="num q-unique">Uniq.</th>
                 <th className="num q-set">Sets</th>
                 <th className="num q-rune">Runes</th>
-                <th className="num q-magic">Charmes</th>
                 <th>Objets identifiés</th>
                 <th />
               </tr>
@@ -229,7 +213,6 @@ export default function Comparison({ characters, routes, sessions, onDelete, rev
                   <td className="num">{s.counts.unique}</td>
                   <td className="num">{s.counts.set}</td>
                   <td className="num">{runeTotal(s.counts)}</td>
-                  <td className="num">{s.counts.charm_small === undefined ? "—" : charmTotal(s.counts)}</td>
                   <td>
                     <button
                       className="link"

@@ -1,4 +1,4 @@
-import { CHARM_KINDS, DROP_CATEGORIES, RUNE_KINDS, type DropKind } from "../data/drops";
+import { DROP_CATEGORIES, RUNE_KINDS, type DropKind } from "../data/drops";
 
 export type Counts = Record<DropKind, number>;
 
@@ -49,18 +49,14 @@ export function summarizeEvents(events: SessionEvent[]): { runs: number; counts:
   let runs = 0;
   for (const e of events) {
     if (e.type === "run") runs++;
-    else counts[e.type]++;
+    // Une catégorie retirée depuis (ex. charmes) est ignorée.
+    else if (e.type in counts) counts[e.type]++;
   }
   return { runs, counts };
 }
 
 export function runeTotal(counts: Counts): number {
   return RUNE_KINDS.reduce((sum, k) => sum + counts[k], 0);
-}
-
-/** Total des charmes magiques (0 pour les sessions enregistrées avant leur ajout). */
-export function charmTotal(counts: Partial<Counts>): number {
-  return CHARM_KINDS.reduce((sum, k) => sum + (counts[k] ?? 0), 0);
 }
 
 /** Taux horaire ; 0 si la durée est nulle. */
@@ -96,7 +92,7 @@ export interface RouteAggregate {
   counts: Counts;
   /**
    * Temps de jeu pendant lequel chaque catégorie était comptée : une session
-   * enregistrée avant l'ajout d'une catégorie (ex. charmes) ne la mesurait pas.
+   * enregistrée avant l'ajout d'une catégorie ne la mesurait pas.
    */
   trackedSeconds: Record<DropKind, number>;
   mfMin: number;
@@ -139,12 +135,12 @@ export function aggregateSessions(sessions: SavedSession[]): RouteAggregate[] {
 }
 
 /** Critère de comparaison : une catégorie, toutes les runes, ou uniques + sets. */
-export type Metric = DropKind | "runes" | "charms" | "uniques_sets";
+export type Metric = DropKind | "runes" | "uniques_sets";
 
 /** Temps pendant lequel le critère était mesuré (une catégorie représentative du groupe). */
 export function metricSeconds(g: Pick<RouteAggregate, "trackedSeconds">, metric: Metric): number {
   const kind: DropKind =
-    metric === "runes" ? "rune_low" : metric === "charms" ? "charm_small" : metric === "uniques_sets" ? "unique" : metric;
+    metric === "runes" ? "rune_low" : metric === "uniques_sets" ? "unique" : metric;
   return g.trackedSeconds[kind];
 }
 
@@ -155,7 +151,6 @@ export function metricRate(g: Pick<RouteAggregate, "counts" | "trackedSeconds">,
 
 export function metricCount(counts: Counts, metric: Metric): number {
   if (metric === "runes") return runeTotal(counts);
-  if (metric === "charms") return charmTotal(counts);
   if (metric === "uniques_sets") return counts.unique + counts.set;
   return counts[metric];
 }

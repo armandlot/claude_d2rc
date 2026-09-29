@@ -66,12 +66,6 @@ export default function Help() {
         </tbody>
       </table>
 
-      <h3>Charmes</h3>
-      <p>
-        Les boutons Small, Large et Grand charm comptent les charmes <span className="q-magic">magiques</span> (bleus).
-        Les charmes uniques (Gheed's Fortune, Annihilus, Hellfire Torch) sont dorés : comptez-les avec « Unique ».
-      </p>
-
       <h3>Identifier ses drops et voir leur prix</h3>
       <p>
         Entre deux runs (panneau « Objets identifiés » de la session) ou à la fin (la revue s'ouvre automatiquement),

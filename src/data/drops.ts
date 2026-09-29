@@ -6,19 +6,14 @@ export type DropKind =
   | "rune_mid"
   | "hr_low"
   | "hr_mid"
-  | "hr_high"
-  | "charm_small"
-  | "charm_large"
-  | "charm_grand";
+  | "hr_high";
 
 export interface DropCategory {
   kind: DropKind;
   label: string;
   short: string;
-  /** Runes du groupe (vide pour les autres catégories). */
+  /** Runes du groupe (vide pour uniques et sets). */
   runes: string[];
-  /** Précision affichée sous le bouton quand il n'y a pas de runes. */
-  hint?: string;
   /** Raccourci clavier. */
   key: string;
 }
@@ -44,15 +39,9 @@ export const DROP_CATEGORIES: DropCategory[] = [
   { kind: "hr_low", label: "Low HR", short: "HR−", runes: ["Mal", "Ist", "Gul"], key: "3" },
   { kind: "hr_mid", label: "Mid HR", short: "HR", runes: ["Vex", "Ohm", "Lo"], key: "4" },
   { kind: "hr_high", label: "High HR", short: "HR+", runes: ["Sur", "Ber", "Jah", "Cham", "Zod"], key: "5" },
-  // Charmes magiques (bleus) ; les charmes uniques (Gheed, Annihilus, Torch) comptent comme « Unique ».
-  { kind: "charm_small", label: "Small charm", short: "SC", runes: [], hint: "1×1 · MF, vie, résistances", key: "6" },
-  { kind: "charm_large", label: "Large charm", short: "LC", runes: [], hint: "1×2", key: "7" },
-  { kind: "charm_grand", label: "Grand charm", short: "GC", runes: [], hint: "1×3 · skillers", key: "8" },
 ];
 
 export const RUNE_KINDS: DropKind[] = ["rune_low", "rune_mid", "hr_low", "hr_mid", "hr_high"];
-
-export const CHARM_KINDS: DropKind[] = ["charm_small", "charm_large", "charm_grand"];
 
 export const CATEGORY_BY_KIND = Object.fromEntries(DROP_CATEGORIES.map((c) => [c.kind, c])) as Record<
   DropKind,

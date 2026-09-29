@@ -1,4 +1,4 @@
-import { CHARM_KINDS, DROP_CATEGORIES, RUNE_KINDS } from "../data/drops";
+import { DROP_CATEGORIES, RUNE_KINDS } from "../data/drops";
 import type { Route } from "../data/routes";
 import { characterWithPossessive, type Character } from "./characters";
 import { compareRates, metricCount, metricSeconds, type Metric, type RouteAggregate } from "./stats";
@@ -8,8 +8,7 @@ export const METRICS: { key: Metric; label: string; unit: string }[] = [
   { key: "set", label: "Sets / h", unit: "sets/h" },
   { key: "uniques_sets", label: "Uniques + sets / h", unit: "uniques + sets/h" },
   { key: "runes", label: "Runes / h (toutes)", unit: "runes/h" },
-  { key: "charms", label: "Charmes / h (tous)", unit: "charmes/h" },
-  ...[...RUNE_KINDS, ...CHARM_KINDS].map((k) => {
+  ...RUNE_KINDS.map((k) => {
     const label = DROP_CATEGORIES.find((c) => c.kind === k)!.label;
     return { key: k as Metric, label: `${label} / h`, unit: `${label}s/h` };
   }),

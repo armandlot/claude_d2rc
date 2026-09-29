@@ -5,11 +5,13 @@ import type { Route } from "../data/routes";
 import { characterLabel, type Character } from "../lib/characters";
 import {
   aggregateSessions,
-  metricCount,
+  metricRate,
+  metricSeconds,
   perHour,
   perHourMargin,
   reliability,
   runeTotal,
+  charmTotal,
   type Metric,
   type Reliability,
   type RouteAggregate,
@@ -39,9 +41,12 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
   const byId = useMemo(() => Object.fromEntries(characters.map((c) => [c.id, c])), [characters]);
   const known = sessions.filter((s) => byId[s.characterId] && routes[s.routeId]);
   const filtered = characterFilter === "all" ? known : known.filter((s) => s.characterId === characterFilter);
-  const rate = (g: RouteAggregate) => perHour(metricCount(g.counts, metric), g.durationSeconds);
+  const rate = (g: RouteAggregate) => metricRate(g, metric);
   const rows = aggregateSessions(filtered).sort((a, b) => rate(b) - rate(a));
-  const contenders: Contender[] = rows.map((g) => ({ character: byId[g.characterId], route: routes[g.routeId], aggregate: g }));
+  // Le verdict n'oppose que des lignes où le critère était mesuré (ex. charmes absents des anciennes sessions).
+  const contenders: Contender[] = rows
+    .filter((g) => metricSeconds(g, metric) > 0)
+    .map((g) => ({ character: byId[g.characterId], route: routes[g.routeId], aggregate: g }));
 
   if (known.length === 0) {
     return (
@@ -86,6 +91,12 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
         </div>
 
         {contenders.length >= 2 && <VerdictPanel contenders={contenders} metric={metric} />}
+        {contenders.length < 2 && rows.length >= 2 && (
+          <p className="hint">
+            Pas de verdict pour ce critère : il faut au moins deux combinaisons où il a été compté (les charmes ne sont
+            comptés que dans les sessions récentes).
+          </p>
+        )}
 
         <div className="table-wrap">
           <table className="compare">
@@ -97,6 +108,7 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
                 <th className="num">Moy.</th>
                 <th className="num q-unique">Uniq./h</th>
                 <th className="num q-set">Sets/h</th>
+                <th className="num q-magic">Charm./h</th>
                 {RUNE_KINDS.map((k) => (
                   <th key={k} className="num q-rune">
                     {DROP_CATEGORIES.find((c) => c.kind === k)!.short}/h
@@ -132,6 +144,18 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
                     <td className="num strong" title={`${g.counts.set} sets · ± ${formatRate(perHourMargin(g.counts.set, g.durationSeconds))} /h`}>
                       {formatRate(perHour(g.counts.set, g.durationSeconds))}
                     </td>
+                    {g.trackedSeconds.charm_small > 0 ? (
+                      <td
+                        className="num strong"
+                        title={`${g.counts.charm_small} SC · ${g.counts.charm_large} LC · ${g.counts.charm_grand} GC`}
+                      >
+                        {formatRate(metricRate(g, "charms"))}
+                      </td>
+                    ) : (
+                      <td className="num muted-cell" title="Sessions enregistrées avant le comptage des charmes">
+                        —
+                      </td>
+                    )}
                     {RUNE_KINDS.map((k) => (
                       <td key={k} className="num" title={`${g.counts[k]} au total`}>
                         {formatRate(perHour(g.counts[k], g.durationSeconds))}
@@ -168,6 +192,7 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
                 <th className="num q-unique">Uniq.</th>
                 <th className="num q-set">Sets</th>
                 <th className="num q-rune">Runes</th>
+                <th className="num q-magic">Charmes</th>
                 <th />
               </tr>
             </thead>
@@ -186,6 +211,7 @@ export default function Comparison({ characters, routes, sessions, onDelete }: P
                   <td className="num">{s.counts.unique}</td>
                   <td className="num">{s.counts.set}</td>
                   <td className="num">{runeTotal(s.counts)}</td>
+                  <td className="num">{s.counts.charm_small === undefined ? "—" : charmTotal(s.counts)}</td>
                   <td className="num">
                     {confirmId === s.id ? (
                       <>
@@ -225,7 +251,7 @@ function VerdictPanel({ contenders, metric }: { contenders: Contender[]; metric:
   const bKey = pick && keys.includes(pick.b) && pick.b !== aKey ? pick.b : defaultB;
   const x = contenders.find((c) => c.aggregate.key === aKey)!;
   const y = contenders.find((c) => c.aggregate.key === bKey)!;
-  const rateOf = (c: Contender) => perHour(metricCount(c.aggregate.counts, metric), c.aggregate.durationSeconds);
+  const rateOf = (c: Contender) => metricRate(c.aggregate, metric);
   const [winner, loser] = rateOf(x) >= rateOf(y) ? [x, y] : [y, x];
   const verdict = buildVerdict(winner, loser, metric);
   const option = (c: Contender) => (

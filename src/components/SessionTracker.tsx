@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { characterLabel, type Character } from "../lib/characters";
-import { DROP_CATEGORIES, RUNE_KINDS, CATEGORY_BY_KIND } from "../data/drops";
+import { CHARM_KINDS, DROP_CATEGORIES, RUNE_KINDS, CATEGORY_BY_KIND } from "../data/drops";
 import { ROUTES, type Route } from "../data/routes";
 import { customRouteName, stopsLabel, type CustomRoute } from "../lib/customRoutes";
 import { usePersistentState } from "../lib/storage";
 import {
   perHour,
+  charmTotal,
   runeTotal,
   summarizeEvents,
   type EventType,
@@ -68,7 +69,7 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
     });
   }, [setActive]);
 
-  // Raccourcis clavier : R = run, U = unique, S = set, 1-5 = runes, Z = annuler, P = pause.
+  // Raccourcis clavier : R = run, U = unique, S = set, 1-5 = runes, 6-8 = charmes, Z = annuler, P = pause.
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
@@ -167,6 +168,7 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
         <Stat label="Uniques / h" value={rate(counts.unique)} tone="unique" />
         <Stat label="Sets / h" value={rate(counts.set)} tone="set" />
         <Stat label="Runes / h" value={rate(runeTotal(counts))} tone="rune" />
+        <Stat label="Charmes / h" value={rate(charmTotal(counts))} tone="magic" />
       </section>
 
       <section className="panel">
@@ -182,6 +184,11 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
         </div>
         <div className="drop-grid runes">
           {RUNE_KINDS.map((kind) => (
+            <DropButton key={kind} kind={kind} count={counts[kind]} onClick={() => add(kind)} />
+          ))}
+        </div>
+        <div className="drop-grid charms">
+          {CHARM_KINDS.map((kind) => (
             <DropButton key={kind} kind={kind} count={counts[kind]} onClick={() => add(kind)} />
           ))}
         </div>
@@ -215,6 +222,7 @@ function DropButton({ kind, count, onClick }: { kind: keyof typeof CATEGORY_BY_K
       </span>
       <span className="drop-count">{count}</span>
       {cat.runes.length > 0 && <span className="drop-runes">{cat.runes.join(" · ")}</span>}
+      {cat.hint && <span className="drop-runes">{cat.hint}</span>}
     </button>
   );
 }

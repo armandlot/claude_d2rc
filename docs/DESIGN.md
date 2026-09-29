@@ -29,6 +29,10 @@ plus**.
 - Le joueur compte ce qui tombe, avant identification : uniques, sets, et
   runes réparties en 5 groupes (Low, Mid, Low HR, Mid HR, High HR).
 - Uniques et sets sont séparés : la Magic Find ne les affecte pas de la même façon.
+- Charmes magiques comptés par taille (Small, Large, Grand) ; les charmes
+  uniques comptent comme « Unique ». Chaque catégorie a son propre temps de
+  suivi : une session enregistrée avant l'ajout des charmes ne compte pas
+  comme « 0 charme », elle est exclue du calcul des charmes.
 - Taux horaire = nombre de drops ÷ temps de jeu hors pause × 3 600.
 - Les sessions d'un même personnage sur une même route sont cumulées.
 - Les drops suivant une loi de Poisson, l'incertitude relative vaut ~1/√n :

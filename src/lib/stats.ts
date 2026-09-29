@@ -1,4 +1,4 @@
-import { DROP_CATEGORIES, RUNE_KINDS, type DropKind } from "../data/drops";
+import { CHARM_KINDS, DROP_CATEGORIES, RUNE_KINDS, type DropKind } from "../data/drops";
 
 export type Counts = Record<DropKind, number>;
 
@@ -43,6 +43,11 @@ export function runeTotal(counts: Counts): number {
   return RUNE_KINDS.reduce((sum, k) => sum + counts[k], 0);
 }
 
+/** Total des charmes magiques (0 pour les sessions enregistrées avant leur ajout). */
+export function charmTotal(counts: Partial<Counts>): number {
+  return CHARM_KINDS.reduce((sum, k) => sum + (counts[k] ?? 0), 0);
+}
+
 /** Taux horaire ; 0 si la durée est nulle. */
 export function perHour(count: number, seconds: number): number {
   return seconds > 0 ? (count / seconds) * 3600 : 0;
@@ -74,6 +79,11 @@ export interface RouteAggregate {
   runs: number;
   durationSeconds: number;
   counts: Counts;
+  /**
+   * Temps de jeu pendant lequel chaque catégorie était comptée : une session
+   * enregistrée avant l'ajout d'une catégorie (ex. charmes) ne la mesurait pas.
+   */
+  trackedSeconds: Record<DropKind, number>;
   mfMin: number;
   mfMax: number;
 }
@@ -93,6 +103,7 @@ export function aggregateSessions(sessions: SavedSession[]): RouteAggregate[] {
         runs: 0,
         durationSeconds: 0,
         counts: emptyCounts(),
+        trackedSeconds: emptyCounts(),
         mfMin: s.magicFind,
         mfMax: s.magicFind,
       };
@@ -101,7 +112,11 @@ export function aggregateSessions(sessions: SavedSession[]): RouteAggregate[] {
     g.sessions++;
     g.runs += s.runs;
     g.durationSeconds += s.durationSeconds;
-    for (const c of DROP_CATEGORIES) g.counts[c.kind] += s.counts[c.kind] ?? 0;
+    for (const c of DROP_CATEGORIES) {
+      if (s.counts[c.kind] === undefined) continue;
+      g.counts[c.kind] += s.counts[c.kind];
+      g.trackedSeconds[c.kind] += s.durationSeconds;
+    }
     g.mfMin = Math.min(g.mfMin, s.magicFind);
     g.mfMax = Math.max(g.mfMax, s.magicFind);
   }
@@ -109,10 +124,23 @@ export function aggregateSessions(sessions: SavedSession[]): RouteAggregate[] {
 }
 
 /** Critère de comparaison : une catégorie, toutes les runes, ou uniques + sets. */
-export type Metric = DropKind | "runes" | "uniques_sets";
+export type Metric = DropKind | "runes" | "charms" | "uniques_sets";
+
+/** Temps pendant lequel le critère était mesuré (une catégorie représentative du groupe). */
+export function metricSeconds(g: Pick<RouteAggregate, "trackedSeconds">, metric: Metric): number {
+  const kind: DropKind =
+    metric === "runes" ? "rune_low" : metric === "charms" ? "charm_small" : metric === "uniques_sets" ? "unique" : metric;
+  return g.trackedSeconds[kind];
+}
+
+/** Taux horaire d'un critère, calculé sur le seul temps où il était mesuré. */
+export function metricRate(g: Pick<RouteAggregate, "counts" | "trackedSeconds">, metric: Metric): number {
+  return perHour(metricCount(g.counts, metric), metricSeconds(g, metric));
+}
 
 export function metricCount(counts: Counts, metric: Metric): number {
   if (metric === "runes") return runeTotal(counts);
+  if (metric === "charms") return charmTotal(counts);
   if (metric === "uniques_sets") return counts.unique + counts.set;
   return counts[metric];
 }

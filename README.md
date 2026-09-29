@@ -2,13 +2,13 @@
 
 Application web pour les joueurs de **Diablo II: Resurrected** : elle compare vos
 routes de farm (Mephisto, Chaos Sanctuary, Pit, Cows…) en comptant les
-**objets uniques, sets et runes obtenus par heure**, avant identification et
+**objets uniques, sets, runes et charmes obtenus par heure**, avant identification et
 quelle que soit leur valeur.
 
 ## Fonctionnalités
 
-- **Session** : chronomètre, gros boutons « +1 run », « Unique », « Set » et un
-  bouton par groupe de runes, annulation de la dernière action, pause,
+- **Session** : chronomètre, gros boutons « +1 run », « Unique », « Set », un
+  bouton par groupe de runes et par taille de charme magique (Small, Large, Grand), annulation de la dernière action, pause,
   raccourcis clavier. Taux par heure en direct.
 - **Personnages** : créez vos personnages (classe, spécialisation, Magic Find,
   Ladder / Non-ladder, Softcore / Hardcore, nom en jeu). Chaque session leur

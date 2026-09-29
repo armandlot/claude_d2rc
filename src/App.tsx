@@ -53,7 +53,7 @@ export default function App() {
         <h1>
           D2R <span>Run Profit</span>
         </h1>
-        <p className="tagline">Comptez vos uniques, sets et runes par heure pour trouver le meilleur duo personnage + route.</p>
+        <p className="tagline">Comptez vos uniques, sets, runes et charmes par heure pour trouver le meilleur duo personnage + route.</p>
         <nav className="tabs" role="tablist">
           {TABS.map((t) => (
             <button

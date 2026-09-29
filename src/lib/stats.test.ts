@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   aggregateSessions,
+  charmTotal,
   compareRates,
+  metricCount,
+  metricRate,
   emptyCounts,
   perHour,
   perHourMargin,
@@ -97,5 +100,42 @@ describe("compareRates", () => {
 
   it("déclare significatif un écart net sur beaucoup de drops", () => {
     expect(compareRates(120, 3600 * 4, 60, 3600 * 4).significant).toBe(true);
+  });
+});
+
+describe("charmes", () => {
+  it("compte les trois tailles et le critère « charms »", () => {
+    const { counts } = summarizeEvents([
+      { type: "charm_small", at: 1 },
+      { type: "charm_small", at: 2 },
+      { type: "charm_grand", at: 3 },
+      { type: "hr_low", at: 4 },
+    ]);
+    expect(charmTotal(counts)).toBe(3);
+    expect(metricCount(counts, "charms")).toBe(3);
+    expect(runeTotal(counts)).toBe(1);
+  });
+
+  it("compte 0 charme pour une session enregistrée avant leur ajout", () => {
+    const legacy = { unique: 3, set: 1, rune_low: 0, rune_mid: 0, hr_low: 0, hr_mid: 0, hr_high: 0 };
+    expect(charmTotal(legacy)).toBe(0);
+    const [g] = aggregateSessions([
+      { id: "x", date: "", characterId: "c", routeId: "pit", magicFind: 300, players: 1, durationSeconds: 60, runs: 1, counts: legacy as never },
+    ]);
+    expect(g.counts.charm_grand).toBe(0);
+    // Les charmes n'étaient pas mesurés : aucun temps de suivi, donc pas de taux.
+    expect(g.trackedSeconds.charm_grand).toBe(0);
+    expect(g.trackedSeconds.unique).toBe(60);
+    expect(metricRate(g, "charms")).toBe(0);
+  });
+
+  it("calcule le taux de charmes sur les seules sessions qui les comptaient", () => {
+    const legacy = { unique: 3, set: 1, rune_low: 0, rune_mid: 0, hr_low: 0, hr_mid: 0, hr_high: 0 } as never;
+    const [g] = aggregateSessions([
+      { id: "a", date: "", characterId: "c", routeId: "pit", magicFind: 300, players: 1, durationSeconds: 3600, runs: 9, counts: legacy },
+      { id: "b", date: "", characterId: "c", routeId: "pit", magicFind: 300, players: 1, durationSeconds: 1800, runs: 9, counts: { ...emptyCounts(), charm_small: 4 } },
+    ]);
+    expect(metricRate(g, "charms")).toBe(8);
+    expect(metricRate(g, "unique")).toBe(2);
   });
 });

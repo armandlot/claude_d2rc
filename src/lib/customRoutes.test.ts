@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Character } from "./characters";
 import { customRouteName, moveStop, routeIndex, toRoute, type CustomRoute } from "./customRoutes";
-import { emptyCounts } from "./stats";
+import { emptyCounts, type RouteAggregate } from "./stats";
 import { buildVerdict } from "./verdict";
 
 const tour: CustomRoute = { id: "custom_1", name: "", stops: ["pindleskin", "mephisto", "summoner", "andariel"] };
@@ -33,6 +33,7 @@ describe("routes custom", () => {
       sessions: 1,
       runs: 30,
       durationSeconds: 3600,
+    trackedSeconds: Object.fromEntries(Object.keys(emptyCounts()).map((k) => [k, 3600])) as RouteAggregate["trackedSeconds"],
       counts: { ...emptyCounts(), unique: uniques },
       mfMin: 400,
       mfMax: 400,

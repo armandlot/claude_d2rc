@@ -1,14 +1,15 @@
-import { DROP_CATEGORIES, RUNE_KINDS } from "../data/drops";
+import { CHARM_KINDS, DROP_CATEGORIES, RUNE_KINDS } from "../data/drops";
 import type { Route } from "../data/routes";
 import { characterWithPossessive, type Character } from "./characters";
-import { compareRates, metricCount, type Metric, type RouteAggregate } from "./stats";
+import { compareRates, metricCount, metricSeconds, type Metric, type RouteAggregate } from "./stats";
 
 export const METRICS: { key: Metric; label: string; unit: string }[] = [
   { key: "unique", label: "Uniques / h", unit: "uniques/h" },
   { key: "set", label: "Sets / h", unit: "sets/h" },
   { key: "uniques_sets", label: "Uniques + sets / h", unit: "uniques + sets/h" },
   { key: "runes", label: "Runes / h (toutes)", unit: "runes/h" },
-  ...RUNE_KINDS.map((k) => {
+  { key: "charms", label: "Charmes / h (tous)", unit: "charmes/h" },
+  ...[...RUNE_KINDS, ...CHARM_KINDS].map((k) => {
     const label = DROP_CATEGORIES.find((c) => c.kind === k)!.label;
     return { key: k as Metric, label: `${label} / h`, unit: `${label}s/h` };
   }),
@@ -40,9 +41,9 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export function buildVerdict(a: Contender, b: Contender, metric: Metric): Verdict {
   const cmp = compareRates(
     metricCount(a.aggregate.counts, metric),
-    a.aggregate.durationSeconds,
+    metricSeconds(a.aggregate, metric),
     metricCount(b.aggregate.counts, metric),
-    b.aggregate.durationSeconds,
+    metricSeconds(b.aggregate, metric),
   );
   const tie = cmp.rateA === cmp.rateB;
   const sameCharacter = a.character.id === b.character.id;

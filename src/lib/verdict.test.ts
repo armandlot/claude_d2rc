@@ -15,6 +15,7 @@ function contender(character: Character, routeId: string, uniques: number, hours
     sessions: 1,
     runs: 40,
     durationSeconds: hours * 3600,
+    trackedSeconds: Object.fromEntries(Object.keys(emptyCounts()).map((k) => [k, hours * 3600])) as RouteAggregate["trackedSeconds"],
     counts: { ...emptyCounts(), unique: uniques },
     mfMin: character.magicFind,
     mfMax: character.magicFind,

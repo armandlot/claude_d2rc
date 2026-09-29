@@ -1042,3 +1042,82 @@ select {
     padding: 1px 4px;
   }
 }
+
+/* ---- v4.1 : ladder / hardcore ---- */
+.segmented {
+  border: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-width: 0;
+}
+
+.segmented legend {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.seg {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.seg:first-of-type {
+  border-radius: 4px 0 0 4px;
+}
+
+.seg:last-of-type {
+  border-radius: 0 4px 4px 0;
+  border-left: none;
+}
+
+.seg input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.seg.active {
+  background: var(--panel-2);
+  color: var(--gold-strong);
+  border-color: var(--gold);
+}
+
+.seg:last-of-type.active {
+  border-left: 1px solid var(--gold);
+}
+
+.seg:has(input:focus-visible) {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.setup-grid .segmented {
+  grid-column: span 2;
+}
+
+@media (max-width: 700px) {
+  .setup-grid .segmented {
+    grid-column: 1 / -1;
+  }
+}
+
+.realm-badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}

@@ -7,12 +7,32 @@ export interface Character {
   classId: ClassId;
   spec: string;
   magicFind: number;
+  /** Royaume Ladder (sinon Non-ladder). */
+  ladder: boolean;
+  /** Mode Hardcore (sinon Softcore). */
+  hardcore: boolean;
 }
 
-/** « Sorcière Météorb », suivi du nom en jeu s'il existe. */
+/** Valeurs par défaut pour les personnages créés avant l'ajout d'un champ. */
+export function normalizeCharacter(c: Partial<Character> & Pick<Character, "id" | "classId">): Character {
+  return { name: "", spec: "", magicFind: 0, ...c, ladder: c.ladder ?? true, hardcore: c.hardcore ?? false };
+}
+
+/** « Ladder Softcore », « Non-ladder Hardcore »… */
+export function realmLabel(c: Pick<Character, "ladder" | "hardcore">): string {
+  return `${c.ladder ? "Ladder" : "Non-ladder"} ${c.hardcore ? "Hardcore" : "Softcore"}`;
+}
+
+/** Abréviation, vide pour le cas par défaut (Ladder Softcore) : « NL », « HC », « NL HC ». */
+export function realmShort(c: Pick<Character, "ladder" | "hardcore">): string {
+  return [c.ladder ? "" : "NL", c.hardcore ? "HC" : ""].filter(Boolean).join(" ");
+}
+
+/** « Sorcière Météorb », suivi du nom en jeu et du mode s'il n'est pas Ladder Softcore. */
 export function characterLabel(c: Character): string {
   const base = `${CLASSES_BY_ID[c.classId].name} ${c.spec}`.trim();
-  return c.name.trim() ? `${base} (${c.name.trim()})` : base;
+  const extras = [c.name.trim(), realmShort(c)].filter(Boolean);
+  return extras.length ? `${base} (${extras.join(", ")})` : base;
 }
 
 /** « ta Sorcière Météorb » / « ton Paladin Marteau ». */
@@ -61,7 +81,7 @@ export function migrateLegacySessions<S extends LegacySession>(
     let character = created.get(buildId);
     if (!character) {
       const legacy = LEGACY_BUILDS[buildId] ?? { classId: "sorceress" as ClassId, spec: "Autre" };
-      character = { id: newCharacterId() + buildId, name: "", ...legacy, magicFind: s.magicFind };
+      character = { id: newCharacterId() + buildId, name: "", ...legacy, magicFind: s.magicFind, ladder: true, hardcore: false };
       created.set(buildId, character);
     }
     const { buildId: _removed, ...rest } = s;

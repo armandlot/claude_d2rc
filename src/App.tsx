@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { ROUTES } from "./data/routes";
 import { usePersistentState } from "./lib/storage";
-import { migrateLegacySessions, type Character } from "./lib/characters";
+import { migrateLegacySessions, normalizeCharacter, type Character } from "./lib/characters";
 import { routeIndex, type CustomRoute } from "./lib/customRoutes";
 import type { SavedSession, SessionSetup } from "./lib/stats";
 import SessionTracker from "./components/SessionTracker";
@@ -25,7 +25,9 @@ const DEFAULT_SETUP: SessionSetup = { characterId: "", routeId: ROUTES[0].id, ma
 export default function App() {
   const [tab, setTab] = usePersistentState<Tab>("v2:tab", "session");
   const [setup, setSetup] = usePersistentState<SessionSetup>("v3:setup", DEFAULT_SETUP);
-  const [characters, setCharacters] = usePersistentState<Character[]>("v3:characters", []);
+  const [storedCharacters, setCharacters] = usePersistentState<Character[]>("v3:characters", []);
+  // Personnages créés avant l'ajout de Ladder / Hardcore : Ladder Softcore par défaut.
+  const characters = useMemo(() => storedCharacters.map(normalizeCharacter), [storedCharacters]);
   const [sessions, setSessions] = usePersistentState<SavedSession[]>("v2:sessions", []);
   const [customRoutes, setCustomRoutes] = usePersistentState<CustomRoute[]>("v4:custom-routes", []);
   const routes = useMemo(() => routeIndex(customRoutes), [customRoutes]);

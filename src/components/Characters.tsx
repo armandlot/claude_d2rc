@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CLASSES, CLASSES_BY_ID, type ClassId } from "../data/classes";
 import type { Route } from "../data/routes";
-import { characterLabel, newCharacterId, type Character } from "../lib/characters";
+import { characterLabel, newCharacterId, realmLabel, type Character } from "../lib/characters";
 import { aggregateSessions, perHour, type SavedSession } from "../lib/stats";
 import { formatDuration, formatRate } from "../format";
 
@@ -52,6 +52,10 @@ export default function Characters({ characters, routes, sessions, onSave, onDel
                 <span className="class-name">{CLASSES_BY_ID[c.classId].name}</span>
                 <h3>{c.spec}</h3>
                 {c.name && <span className="hint">« {c.name} »</span>}
+                <div className="realm-badges" title={realmLabel(c)}>
+                  <span className="badge">{c.ladder ? "Ladder" : "Non-ladder"}</span>
+                  <span className={c.hardcore ? "badge warn" : "badge"}>{c.hardcore ? "Hardcore" : "Softcore"}</span>
+                </div>
               </header>
               <dl>
                 <div>
@@ -112,7 +116,15 @@ export default function Characters({ characters, routes, sessions, onSave, onDel
 }
 
 function blank(): Character {
-  return { id: newCharacterId(), name: "", classId: "sorceress", spec: CLASSES_BY_ID.sorceress.specs[0], magicFind: 300 };
+  return {
+    id: newCharacterId(),
+    name: "",
+    classId: "sorceress",
+    spec: CLASSES_BY_ID.sorceress.specs[0],
+    magicFind: 300,
+    ladder: true,
+    hardcore: false,
+  };
 }
 
 function CharacterForm({
@@ -198,6 +210,16 @@ function CharacterForm({
           Nom en jeu (facultatif)
           <input id="char-name" value={c.name} maxLength={20} onChange={(e) => update({ name: e.target.value })} placeholder="ex. Lyra" />
         </label>
+        <fieldset className="segmented">
+          <legend>Royaume</legend>
+          <Choice name="ladder" checked={c.ladder} label="Ladder" onSelect={() => update({ ladder: true })} />
+          <Choice name="ladder" checked={!c.ladder} label="Non-ladder" onSelect={() => update({ ladder: false })} />
+        </fieldset>
+        <fieldset className="segmented">
+          <legend>Mode</legend>
+          <Choice name="hardcore" checked={!c.hardcore} label="Softcore" onSelect={() => update({ hardcore: false })} />
+          <Choice name="hardcore" checked={c.hardcore} label="Hardcore" onSelect={() => update({ hardcore: true })} />
+        </fieldset>
         {custom && (
           <label className="full">
             Votre spécialisation
@@ -219,5 +241,15 @@ function CharacterForm({
         )}
       </div>
     </form>
+  );
+}
+
+function Choice({ name, checked, label, onSelect }: { name: string; checked: boolean; label: string; onSelect: () => void }) {
+  const id = `char-${name}-${label.toLowerCase()}`;
+  return (
+    <label htmlFor={id} className={checked ? "seg active" : "seg"}>
+      <input id={id} type="radio" name={name} checked={checked} onChange={onSelect} />
+      {label}
+    </label>
   );
 }

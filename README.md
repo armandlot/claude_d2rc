@@ -11,7 +11,8 @@ quelle que soit leur valeur.
   bouton par groupe de runes, annulation de la dernière action, pause,
   raccourcis clavier. Taux par heure en direct.
 - **Personnages** : créez vos personnages (classe, spécialisation, Magic Find,
-  nom en jeu). Chaque session leur est rattachée.
+  Ladder / Non-ladder, Softcore / Hardcore, nom en jeu). Chaque session leur
+  est rattachée.
 - **Routes** : créez vos routes custom en enchaînant des boss ou zones dans
   une même partie (ex. Pindleskin → Mephisto → Summoner → Andariel), avec un
   nom facultatif. Elles se comparent aux routes classiques.

@@ -25,7 +25,7 @@ describe("routes custom", () => {
   });
 
   it("s'intègre dans une phrase de verdict", () => {
-    const sorc: Character = { id: "s", name: "", classId: "sorceress", spec: "Blizzard", magicFind: 400 };
+    const sorc: Character = { id: "s", name: "", classId: "sorceress", spec: "Blizzard", magicFind: 400, ladder: true, hardcore: false };
     const agg = (routeId: string, uniques: number) => ({
       key: routeId,
       characterId: "s",

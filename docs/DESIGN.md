@@ -39,7 +39,10 @@ plus**.
 
 ### Personnages et verdict (v3)
 
-- Un personnage = classe + spécialisation + Magic Find (+ nom en jeu facultatif).
+- Un personnage = classe + spécialisation + Magic Find + royaume (Ladder ou
+  Non-ladder) + mode (Softcore ou Hardcore), et un nom en jeu facultatif.
+  Par défaut : Ladder Softcore ; le mode n'apparaît dans le libellé (« NL »,
+  « HC ») que s'il diffère de ce défaut.
   La MF saisie au lancement d'une session met à jour celle du personnage.
 - Le verdict compare deux combinaisons personnage + route sur le critère choisi.
   Par défaut : la meilleure contre le meilleur résultat d'un **autre** personnage.

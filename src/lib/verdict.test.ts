@@ -4,8 +4,8 @@ import type { Character } from "./characters";
 import { emptyCounts, type RouteAggregate } from "./stats";
 import { buildVerdict, type Contender } from "./verdict";
 
-const meteorb: Character = { id: "m", name: "", classId: "sorceress", spec: "Météorb", magicFind: 350 };
-const hammer: Character = { id: "h", name: "", classId: "paladin", spec: "Marteau", magicFind: 180 };
+const meteorb: Character = { id: "m", name: "", classId: "sorceress", spec: "Météorb", magicFind: 350, ladder: true, hardcore: false };
+const hammer: Character = { id: "h", name: "", classId: "paladin", spec: "Marteau", magicFind: 180, ladder: true, hardcore: false };
 
 function contender(character: Character, routeId: string, uniques: number, hours: number): Contender {
   const aggregate: RouteAggregate = {

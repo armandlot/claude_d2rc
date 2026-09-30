@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { characterLabel, type Character } from "../lib/characters";
 import { DROP_CATEGORIES, RUNE_KINDS, CATEGORY_BY_KIND } from "../data/drops";
 import { ROUTES, type Route } from "../data/routes";
@@ -16,6 +16,7 @@ import {
 } from "../lib/stats";
 import { formatDuration, formatRate } from "../format";
 import ItemLog from "./ItemLog";
+import { activeMs, COUNT_PROMPT_MS, currentRunMs, isDoubleRun, lastRunEndMs, runDurationsMs } from "../lib/runs";
 
 interface ActiveSession extends SessionSetup {
   startedAt: number;
@@ -46,6 +47,18 @@ const EVENT_LABEL: Record<EventType, string> = {
 export default function SessionTracker({ characters, customRoutes, routes, setup, onSetupChange, onSave, onCharacterMagicFind, onCreateCharacter }: Props) {
   const [active, setActive] = usePersistentState<ActiveSession | null>("v3:active-session", null);
   const [now, setNow] = useState(() => Date.now());
+  // Message de confirmation éphémère (fin de run, double clic ignoré).
+  const [toast, setToast] = useState<{ text: string; warn?: boolean } | null>(null);
+  const toastTimer = useRef<number | undefined>(undefined);
+  // « Terminer » demandé alors qu'un run est en cours : figé à cet instant.
+  const [finishAt, setFinishAt] = useState<number | null>(null);
+
+  const notify = useCallback((text: string, warn = false) => {
+    setToast({ text, warn });
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3000);
+  }, []);
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
   useEffect(() => {
     if (!active || active.pausedAt) return;
@@ -54,9 +67,29 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
   }, [active]);
 
   const add = useCallback(
-    (type: EventType) => setActive((a) => (a ? { ...a, events: [...a.events, { type, at: Date.now() }] } : a)),
+    (type: EventType) =>
+      setActive((a) => {
+        if (!a) return a;
+        const t = Date.now();
+        return { ...a, events: [...a.events, { type, at: t, elapsedMs: activeMs(a, t) }] };
+      }),
     [setActive],
   );
+
+  /** Fin de run, protégée contre les doubles clics et les touches Entrée/Espace répétées. */
+  const endRun = useCallback(() => {
+    if (!active) return;
+    const t = Date.now();
+    if (isDoubleRun(active.events, t)) {
+      notify("Double clic ignoré : un run vient déjà d'être terminé.", true);
+      return;
+    }
+    const n = active.events.filter((e) => e.type === "run").length + 1;
+    const duration = currentRunMs(active.events, active, t) / 1000;
+    add("run");
+    setNow(t);
+    notify(`Run n°${n} terminé en ${formatDuration(duration)} ✓`);
+  }, [active, add, notify]);
   const undo = useCallback(
     () => setActive((a) => (a && a.events.length ? { ...a, events: a.events.slice(0, -1) } : a)),
     [setActive],
@@ -78,7 +111,7 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest("input, select, textarea")) return;
       const key = e.key.toLowerCase();
-      if (key === "r") add("run");
+      if (key === "r") endRun();
       else if (key === "z") undo();
       else if (key === "p") togglePause();
       else {
@@ -90,7 +123,7 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, add, undo, togglePause]);
+  }, [active, add, undo, togglePause, endRun]);
 
   if (!active) {
     if (characters.length === 0) {
@@ -124,14 +157,17 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
   }
   const character = characters.find((c) => c.id === active.characterId);
 
-  const elapsed = Math.max(0, ((active.pausedAt ?? now) - active.startedAt - active.pausedTotalMs) / 1000);
+  const elapsed = activeMs(active, now) / 1000;
   const { runs, counts } = summarizeEvents(active.events);
   const last = active.events[active.events.length - 1];
+  const runNow = currentRunMs(active.events, active, now) / 1000;
+  const recentRuns = runDurationsMs(active.events, active).slice(-5).reverse();
   // Sous 2 minutes, un taux horaire n'a pas de sens (1 unique en 10 s = 360/h).
   const rate = (count: number) => (elapsed >= 120 ? formatRate(perHour(count, elapsed)) : "—");
 
-  const finish = () => {
-    if (runs > 0) {
+  /** Enregistre la session ; sans run compté, elle est abandonnée. */
+  const save = (runCount: number, durationMs: number) => {
+    if (runCount > 0) {
       onSave({
         id: String(Date.now()),
         date: new Date(active.startedAt).toISOString(),
@@ -139,14 +175,23 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
         routeId: active.routeId,
         magicFind: active.magicFind,
         players: active.players,
-        durationSeconds: Math.round(elapsed),
-        runs,
+        durationSeconds: Math.round(durationMs / 1000),
+        runs: runCount,
         counts,
         items: active.items ?? [],
       });
     }
+    setFinishAt(null);
     setActive(null);
   };
+
+  const finish = () => {
+    const t = Date.now();
+    // Un run est en cours depuis un moment : on demande s'il faut le compter.
+    if (currentRunMs(active.events, active, t) >= COUNT_PROMPT_MS) setFinishAt(t);
+    else save(runs, activeMs(active, t));
+  };
+  const pendingRun = finishAt !== null ? currentRunMs(active.events, active, finishAt) / 1000 : 0;
 
   return (
     <div className="session">
@@ -160,9 +205,16 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
             {character ? characterLabel(character) : "Personnage supprimé"} · {active.magicFind} % MF · joueurs {active.players}
           </p>
         </div>
-        <div className={active.pausedAt ? "timer paused" : "timer"} aria-live="off">
-          {formatDuration(elapsed)}
-          {active.pausedAt && <span>en pause</span>}
+        <div className={active.pausedAt ? "timers paused" : "timers"} aria-live="off">
+          <div className="timer">
+            <small>Run n°{runs + 1}</small>
+            {formatDuration(runNow)}
+          </div>
+          <div className="timer total">
+            <small>Session</small>
+            {formatDuration(elapsed)}
+          </div>
+          {active.pausedAt && <span className="paused-label">en pause</span>}
         </div>
       </section>
 
@@ -175,10 +227,28 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
       </section>
 
       <section className="panel">
-        <button className="run-button" onClick={() => add("run")}>
-          +1 run <kbd>R</kbd>
-          <span>{runs}</span>
+        <button
+          className="run-button"
+          onClick={(e) => {
+            // Le bouton ne garde pas le focus : Entrée ou Espace ne le redéclenchent pas.
+            e.currentTarget.blur();
+            endRun();
+          }}
+        >
+          Terminer le run n°{runs + 1} <kbd>R</kbd>
+          <span title="Runs terminés">{runs}</span>
         </button>
+        <div className="run-feedback" aria-live="polite">
+          {toast ? (
+            <span className={toast.warn ? "toast warn" : "toast"}>{toast.text}</span>
+          ) : recentRuns.length ? (
+            <span className="recent-runs">
+              Derniers runs : {recentRuns.map((ms) => formatDuration(ms / 1000)).join(" · ")}
+            </span>
+          ) : (
+            <span className="recent-runs">Cliquez à la fin de chaque partie, avant d'en créer une nouvelle.</span>
+          )}
+        </div>
 
         <div className="drop-grid two">
           {(["unique", "set"] as const).map((kind) => (
@@ -198,13 +268,34 @@ export default function SessionTracker({ characters, customRoutes, routes, setup
           <button className="secondary" onClick={togglePause}>
             {active.pausedAt ? "Reprendre" : "Pause"} <kbd>P</kbd>
           </button>
-          <button className="secondary danger" onClick={finish}>
-            {runs > 0 ? "Terminer et enregistrer" : "Abandonner"}
+          <button className="secondary danger" onClick={finish} disabled={finishAt !== null}>
+            {runs > 0 || runNow * 1000 >= COUNT_PROMPT_MS ? "Terminer la session" : "Abandonner"}
           </button>
         </div>
+        {finishAt !== null && (
+          <div className="finish-confirm" role="dialog" aria-labelledby="finish-title">
+            <p id="finish-title">
+              Le run n°{runs + 1} est en cours depuis <strong>{formatDuration(pendingRun)}</strong>. Faut-il le compter ?
+            </p>
+            <div className="actions">
+              <button className="primary" autoFocus onClick={() => save(runs + 1, activeMs(active, finishAt))}>
+                Compter le run n°{runs + 1} et enregistrer
+              </button>
+              <button className="secondary" onClick={() => save(runs, lastRunEndMs(active.events, active))}>
+                {runs > 0 ? `Ne pas le compter (enregistrer ${runs} run${runs > 1 ? "s" : ""})` : "Ne pas le compter (abandonner)"}
+              </button>
+              <button className="link" onClick={() => setFinishAt(null)}>
+                Continuer la session
+              </button>
+            </div>
+            {runs > 0 && (
+              <p className="hint">Sans ce run, le temps écoulé depuis la fin du run n°{runs} n'est pas compté.</p>
+            )}
+          </div>
+        )}
         <p className="hint">
-          Cliquez « +1 run » à la fin de chaque partie. Comptez chaque objet doré (unique) ou vert (set) dès qu'il tombe,
-          avant identification.
+          Terminez le run à la fin de chaque partie. Pour le dernier, « Terminer la session » propose de le compter.
+          Comptez chaque objet doré (unique) ou vert (set) dès qu'il tombe, avant identification.
         </p>
       </section>
 

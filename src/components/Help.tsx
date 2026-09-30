@@ -20,7 +20,7 @@ export default function Help() {
       <p>
         Dans l'onglet Routes, enchaînez plusieurs boss ou zones faits dans la même partie, par exemple Pindleskin →
         Mephisto → Summoner → Andariel. La route apparaît ensuite dans la Session et la Comparaison, face aux routes
-        classiques. Un run = une partie complète : cliquez « +1 run » une seule fois, après la dernière étape.
+        classiques. Un run = une partie complète : terminez le run une seule fois, après la dernière étape.
       </p>
 
       <h3>Pendant le farm</h3>
@@ -29,17 +29,24 @@ export default function Help() {
           Onglet Session : choisissez le personnage, la route et /players, puis « Démarrer le chrono ». Si votre MF a
           changé, corrigez-la : elle sera mise à jour sur le personnage.
         </li>
-        <li>À la fin de chaque partie : « +1 run ».</li>
+        <li>
+          À la fin de chaque partie : « Terminer le run ». Le chrono « Run n°… » repart alors de 0:00 : s'il affiche
+          quelques secondes au moment de créer la partie suivante, le run est bien compté. Un second clic dans les 5
+          secondes est ignoré (double clic).
+        </li>
         <li>À chaque drop : le bouton correspondant. Une erreur ? « Annuler ».</li>
         <li>Une pause (pipi, commerce) : « Pause ». Le temps en pause n'est pas compté.</li>
-        <li>À la fin : « Terminer et enregistrer ».</li>
+        <li>
+          À la fin : « Terminer la session ». Si un run est en cours, l'application demande s'il faut le compter : pour
+          une session d'un seul run, pas besoin de terminer le run avant.
+        </li>
       </ol>
 
       <h3>Raccourcis clavier</h3>
       <p>Quand la page a le focus (second écran, fenêtre à côté du jeu) :</p>
       <ul className="keys">
         <li>
-          <kbd>R</kbd> +1 run
+          <kbd>R</kbd> terminer le run
         </li>
         {DROP_CATEGORIES.map((c) => (
           <li key={c.kind}>

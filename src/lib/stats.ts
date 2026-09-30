@@ -8,6 +8,8 @@ export interface SessionEvent {
   type: EventType;
   /** Horodatage (ms). */
   at: number;
+  /** Temps de jeu écoulé hors pauses au moment de l'événement (ms). Absent sur les anciennes sessions. */
+  elapsedMs?: number;
 }
 
 export interface SessionSetup {

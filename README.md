@@ -7,7 +7,8 @@ quelle que soit leur valeur.
 
 ## Fonctionnalités
 
-- **Session** : chronomètre, gros boutons « +1 run », « Unique », « Set » et un
+- **Session** : chronomètre de session et du run en cours, gros boutons
+  « Terminer le run » (protégé contre les doubles clics), « Unique », « Set » et un
   bouton par groupe de runes, annulation de la dernière action, pause,
   raccourcis clavier. Taux par heure en direct.
 - **Personnages** : créez vos personnages (classe, spécialisation, Magic Find,

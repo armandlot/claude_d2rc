@@ -41,6 +41,17 @@ plus**.
 - La MF et /players sont enregistrés avec chaque session pour comparer à
   conditions égales.
 
+### Runs (v6)
+
+- Chaque événement mémorise le temps de jeu écoulé hors pauses (`elapsedMs`) :
+  chrono du run en cours, durée des 5 derniers runs (`src/lib/runs.ts`).
+- « Terminer le run » : le bouton perd le focus après le clic (Entrée/Espace ne
+  le redéclenchent plus) et un second « fin de run » à moins de 5 s est ignoré.
+- « Terminer la session » : si un run est en cours depuis plus de 10 s,
+  l'application demande de le compter ou non ; sans lui, le temps écoulé depuis
+  le dernier run terminé est exclu. Une session d'un seul run s'enregistre donc
+  sans avoir à terminer le run avant.
+
 ### Personnages et verdict (v3)
 
 - Un personnage = classe + spécialisation + Magic Find + royaume (Ladder ou

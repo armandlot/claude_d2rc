@@ -227,7 +227,7 @@ function RouteForm({
           Annuler
         </button>
       </div>
-      <p className="hint">Un run = une partie complète : cliquez « +1 run » une seule fois, après la dernière étape.</p>
+      <p className="hint">Un run = une partie complète : terminez le run une seule fois, après la dernière étape.</p>
     </form>
   );
 }

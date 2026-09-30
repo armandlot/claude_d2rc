@@ -52,6 +52,14 @@ plus**.
   le dernier run terminé est exclu. Une session d'un seul run s'enregistre donc
   sans avoir à terminer le run avant.
 
+### Mode maintenance (v7)
+
+- Case « Mode maintenance » mémorisée ; elle ajoute un onglet dédié.
+- Liste des sessions (filtres personnage / route, totaux), éditeur complet
+  (personnage, route, date, MF, /players, durée « h:mm:ss », « 90 », « 1h30 »,
+  runs, drops) avec aperçu des taux et validation (`src/lib/maintenance.ts`),
+  suppression confirmée, abandon d'une session en cours bloquée.
+
 ### Personnages et verdict (v3)
 
 - Un personnage = classe + spécialisation + Magic Find + royaume (Ladder ou
@@ -122,6 +130,8 @@ custom (`customRoutes.ts`) et verdicts (`verdict.ts`), traderie (`traderie.ts`) 
 - [ ] Détail par étape d'une route custom (quel boss a lâché quoi)
 - [x] v5 : objets identifiés et lien de prix Traderie
 - [ ] Version du jeu dans la fiche du personnage (paramètre Traderie)
+- [x] v7 : mode maintenance (explorer, corriger, supprimer les sessions)
+- [ ] Sauvegarde / restauration des données (export JSON)
 - [ ] Export / import des sessions (JSON) pour les partager
 - [ ] Graphique d'évolution par session
 - [ ] Bouton « unique élite » (base visible avant identification)

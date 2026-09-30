@@ -29,6 +29,9 @@ quelle que soit leur valeur.
   l'application génère un lien vers les échanges vérifiés récents sur
   **Traderie**, filtré sur le mode (Softcore/Hardcore) et le royaume
   (Ladder/Non-ladder) du personnage. La valeur relevée se note à côté.
+- **Mode maintenance** (case à cocher) : onglet pour explorer les sessions
+  enregistrées (filtres personnage / route), les corriger ou les supprimer, et
+  abandonner une session en cours restée bloquée.
 - **Aide** : mode d'emploi, raccourcis et groupes de runes.
 
 Groupes de runes (Ladder) :

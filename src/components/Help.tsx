@@ -84,6 +84,14 @@ export default function Help() {
         rouvre cette revue.
       </p>
 
+      <h3>Mode maintenance</h3>
+      <p>
+        La case « Mode maintenance » (sous les onglets) affiche un onglet Maintenance : toutes vos sessions
+        enregistrées, filtrables par personnage et par route. Cliquez sur une session pour corriger son personnage, sa
+        route, sa date, sa MF, sa durée, son nombre de runs ou ses drops, ou pour la supprimer. Une session en cours
+        restée bloquée peut aussi y être abandonnée.
+      </p>
+
       <h3>Lire la comparaison</h3>
       <ul>
         <li>Chaque taux = nombre de drops ÷ temps de jeu hors pause × 3 600.</li>

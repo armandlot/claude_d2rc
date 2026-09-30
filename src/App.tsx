@@ -9,8 +9,9 @@ import Comparison from "./components/Comparison";
 import Characters from "./components/Characters";
 import RoutesManager from "./components/RoutesManager";
 import Help from "./components/Help";
+import Maintenance from "./components/Maintenance";
 
-type Tab = "session" | "comparison" | "characters" | "routes" | "help";
+type Tab = "session" | "comparison" | "characters" | "routes" | "help" | "maintenance";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "session", label: "Session" },
@@ -31,7 +32,9 @@ export default function App() {
   const [sessions, setSessions] = usePersistentState<SavedSession[]>("v2:sessions", []);
   const [customRoutes, setCustomRoutes] = usePersistentState<CustomRoute[]>("v4:custom-routes", []);
   const routes = useMemo(() => routeIndex(customRoutes), [customRoutes]);
-  const current = TABS.some((t) => t.id === tab) ? tab : "session";
+  const [maintenance, setMaintenance] = usePersistentState("v6:maintenance", false);
+  const tabs = maintenance ? [...TABS, { id: "maintenance" as Tab, label: "Maintenance" }] : TABS;
+  const current = tabs.some((t) => t.id === tab) ? tab : "session";
   const [reviewId, setReviewId] = usePersistentState<string | null>("v5:review", null);
 
   // Reprise des sessions v2 (liées à un build) : un personnage est créé par build.
@@ -56,21 +59,44 @@ export default function App() {
         </h1>
         <p className="tagline">Comptez vos uniques, sets et runes par heure pour trouver le meilleur duo personnage + route.</p>
         <nav className="tabs" role="tablist">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               role="tab"
               aria-selected={current === t.id}
-              className={current === t.id ? "tab active" : "tab"}
+              className={`${current === t.id ? "tab active" : "tab"}${t.id === "maintenance" ? " tab-maintenance" : ""}`}
               onClick={() => setTab(t.id)}
             >
-              {t.label}
+              {t.id === "maintenance" ? (
+                <>
+                  <span className="label-long">Maintenance</span>
+                  <span className="label-short" aria-hidden="true">
+                    Maint.
+                  </span>
+                </>
+              ) : (
+                t.label
+              )}
               {t.id === "comparison" && sessions.length > 0 && <span className="tab-count">{sessions.length}</span>}
               {t.id === "characters" && characters.length > 0 && <span className="tab-count">{characters.length}</span>}
               {t.id === "routes" && customRoutes.length > 0 && <span className="tab-count">{customRoutes.length}</span>}
             </button>
           ))}
         </nav>
+        <div className="maintenance-switch">
+          <label className="checkbox">
+            <input
+              id="maintenance-toggle"
+              type="checkbox"
+              checked={maintenance}
+              onChange={(e) => {
+                setMaintenance(e.target.checked);
+                setTab(e.target.checked ? "maintenance" : "session");
+              }}
+            />
+            Mode maintenance
+          </label>
+        </div>
       </header>
 
       <main>
@@ -144,6 +170,20 @@ export default function App() {
           />
         )}
         {current === "help" && <Help />}
+        {current === "maintenance" && (
+          <Maintenance
+            characters={characters}
+            customRoutes={customRoutes}
+            routes={routes}
+            sessions={sessions}
+            onUpdate={(updated) => setSessions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)))}
+            onDelete={(id) => setSessions((prev) => prev.filter((s) => s.id !== id))}
+            onReview={(id) => {
+              setReviewId(id);
+              setTab("comparison");
+            }}
+          />
+        )}
       </main>
 
       <footer className="footer">

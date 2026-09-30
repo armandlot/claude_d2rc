@@ -1346,3 +1346,147 @@ select {
 .finish-confirm p {
   margin: 0;
 }
+
+/* ---- mode maintenance ---- */
+.maintenance-switch {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.maintenance-switch label {
+  margin: 0;
+  font-size: 12px;
+}
+
+.tab-maintenance {
+  color: #e6b35a;
+}
+
+.tab-maintenance.active {
+  border-color: #7a5d2a;
+}
+
+.maintenance-intro {
+  border-top: 3px solid #e6b35a;
+}
+
+.maintenance-intro p {
+  margin: 0;
+}
+
+.mnt-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 6px;
+}
+
+.mnt-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1.2fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  color: var(--text);
+}
+
+.mnt-row:hover {
+  border-color: var(--gold);
+}
+
+.mnt-date,
+.mnt-figures {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.mnt-what {
+  display: grid;
+}
+
+.mnt-what small {
+  color: var(--muted);
+}
+
+.mnt-edit {
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .mnt-row {
+    grid-template-columns: 1fr auto;
+  }
+  .mnt-date {
+    grid-column: 1 / -1;
+  }
+  .mnt-figures {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
+.mnt-list li.editing {
+  border: 1px solid #e6b35a;
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--panel-2);
+}
+
+.mnt-editor .setup-grid {
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+
+.mnt-editor .setup-grid label:nth-child(-n + 2) {
+  grid-column: auto;
+}
+
+.mnt-counts {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px 0;
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0 10px;
+  min-width: 0;
+}
+
+.mnt-counts legend {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 0 4px;
+}
+
+.mnt-counts .drop-label {
+  font-size: 13px;
+  color: var(--c);
+}
+
+.mnt-errors {
+  color: #e0735f;
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+
+.label-short {
+  display: none;
+}
+
+@media (max-width: 420px) {
+  .tab-maintenance .label-long {
+    display: none;
+  }
+  .tab-maintenance .label-short {
+    display: inline;
+  }
+}

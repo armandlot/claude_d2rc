@@ -19,7 +19,7 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "d2r-run-profit"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "991efc31-0e81-4e6d-abff-5d5030c36e55"
 migrations_dir = "migrations"
 
 [observability]

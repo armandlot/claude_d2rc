@@ -154,13 +154,46 @@ en JSON : ajouter une catégorie de drop ne demande pas de migration.
 
 ## Données et sécurité
 
-- **Pas de compte** : chaque appareil reçoit une **clé de profil** aléatoire (192 bits),
+- **Sans compte** : chaque appareil reçoit une **clé de profil** aléatoire (192 bits),
   envoyée dans l'en-tête `X-Profile-Key`. La base ne stocke que son empreinte SHA-256.
-- Pour retrouver ses données sur un autre appareil : badge de synchronisation →
-  **Copier** la clé, puis sur l'autre appareil **Utiliser cette clé**.
-- Qui possède la clé peut lire et modifier les données du profil : ne la partagez pas.
+  Elle sauvegarde l'appareil.
+- **Avec « Se connecter avec Google »** : les données suivent le compte sur tous les
+  appareils. Seul le scope `openid` est demandé : Google ne transmet qu'un identifiant
+  opaque (`sub`), stocké haché (HMAC-SHA256 avec le secret `AUTH_PEPPER`). Ni e-mail,
+  ni nom, ni jeton Google conservé. Session : cookie `__Host-d2r_session` (HttpOnly,
+  Secure, SameSite=Lax, 90 jours prolongés à l'usage), dont la base ne garde que
+  l'empreinte. À la première connexion, les données de l'appareil rejoignent le compte.
+- « Supprimer mon compte » efface le compte, ses sessions et toutes ses données.
 - L'application reste utilisable hors ligne ; les modifications partent au retour du réseau.
   En cas de modifications sur deux appareils à la fois, la plus récente l'emporte.
+
+## Connexion Google
+
+1. **Google Cloud Console** → *APIs & Services* :
+   - *OAuth consent screen* : type **External**, sans scope supplémentaire ; en mode
+     **Testing**, ajoutez les comptes autorisés dans *Test users* (100 maximum).
+   - *Credentials* → **Create credentials → OAuth client ID** → *Web application*,
+     avec ces *Authorized redirect URIs* :
+     - `https://d2r-run-counter.<votre-sous-domaine>.workers.dev/api/auth/google/callback`
+     - `http://localhost:8787/api/auth/google/callback`
+2. L'**ID client** (public) va dans `wrangler.toml`, section `[vars]`.
+3. Deux **secrets**, jamais dans le dépôt : Cloudflare → *Workers & Pages* →
+   `d2r-run-counter` → *Settings* → *Variables and Secrets* → **Add** → type **Secret** :
+   - `GOOGLE_CLIENT_SECRET` : le code secret du client OAuth ;
+   - `AUTH_PEPPER` : une longue chaîne aléatoire (ex. `openssl rand -base64 32`).
+     Ne la changez plus ensuite : les comptes existants ne seraient plus reconnus.
+4. Créez les tables : D1 → `d2r-run-counter` → *Console* → collez
+   `migrations/0002_auth.sql` → *Execute* (ou `npm run db:migrate:remote`).
+
+Tant que les secrets manquent, le bouton de connexion n'apparaît pas et
+l'application fonctionne comme avant.
+
+En local, créez `.dev.vars` (ignoré par git) :
+
+```bash
+GOOGLE_CLIENT_SECRET="…"
+AUTH_PEPPER="une-chaine-aleatoire-locale"
+```
 
 ## Limites de l'offre gratuite
 

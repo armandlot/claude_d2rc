@@ -64,6 +64,18 @@ plus**.
 - Identité sans compte : clé de profil aléatoire (192 bits) par appareil, en-tête
   `X-Profile-Key`, seule son empreinte SHA-256 est stockée. La même clé relie
   plusieurs appareils.
+- Comptes (v9, `worker/auth.ts`, `worker/oidc.ts`) : « Se connecter avec Google »,
+  OpenID Connect avec code d'autorisation + PKCE (S256), `state` et `nonce` gardés
+  10 minutes dans un cookie HttpOnly, scope `openid` seul. L'ID token, reçu
+  directement de l'endpoint token de Google en HTTPS, est vérifié sur `iss`, `aud`,
+  `exp` et `nonce`. Seul HMAC(`sub`) est stocké ; aucun jeton Google n'est gardé.
+  Session : cookie `__Host-` HttpOnly ; la base garde l'empreinte du jeton. Les
+  données d'un compte vivent dans le profil `u:<id>` des tables existantes. À la
+  première connexion, l'appareil fusionne ses données dans le compte (union par
+  identifiant, l'appareil l'emporte) et son profil anonyme est effacé. Requêtes
+  qui modifient des données avec le cookie : vérification de l'en-tête `Origin`.
+  Application Android uniquement : redirection dans la même fenêtre (la PWA
+  installée et Chrome partagent leurs cookies).
 - Synchronisation (`src/lib/useCloudSync.ts`, `src/lib/sync.ts`) : réconciliation
   au démarrage, au retour du réseau et au retour au premier plan ; envoi 1,5 s
   après une modification. Conflit : la modification la plus récente l'emporte ;
@@ -154,6 +166,7 @@ custom (`customRoutes.ts`) et verdicts (`verdict.ts`), traderie (`traderie.ts`) 
 - [x] v7 : mode maintenance (explorer, corriger, supprimer les sessions)
 - [ ] Sauvegarde / restauration des données (export JSON)
 - [x] v8 : déploiement Cloudflare Workers, base D1, PWA, synchronisation entre appareils
+- [x] v9 : connexion avec Google (sans e-mail ni mot de passe)
 - [ ] Export / import des sessions (JSON) pour les partager
 - [ ] Graphique d'évolution par session
 - [ ] Bouton « unique élite » (base visible avant identification)

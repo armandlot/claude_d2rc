@@ -106,9 +106,13 @@ export default function App() {
             status={sync.status}
             message={sync.message}
             pending={sync.pending}
-            profileKey={sync.profileKey}
+            auth={sync.auth}
+            notice={sync.notice}
+            onDismissNotice={sync.dismissNotice}
             onSyncNow={() => void sync.syncNow()}
-            onLinkProfile={sync.linkProfile}
+            onLogin={sync.login}
+            onLogout={sync.logout}
+            onDeleteAccount={sync.deleteAccount}
           />
           <label className="checkbox">
             <input

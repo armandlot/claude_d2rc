@@ -24,3 +24,9 @@ migrations_dir = "migrations"
 
 [observability]
 enabled = true
+
+# Connexion Google. L'ID client est public ; les secrets GOOGLE_CLIENT_SECRET et
+# AUTH_PEPPER se règlent dans Cloudflare (Settings → Variables and Secrets), ou dans
+# .dev.vars en local : jamais dans le dépôt.
+[vars]
+GOOGLE_CLIENT_ID = "1065872748048-6rpjb4hq88bbf3di7dkf99884nlcs0it.apps.googleusercontent.com"

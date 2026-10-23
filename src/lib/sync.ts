@@ -54,24 +54,37 @@ export function isProfileKey(key: string): boolean {
 }
 
 export class ApiUnavailable extends Error {}
+/** Compte : session expirée ou fermée ailleurs. */
+export class SignedOut extends Error {}
 
-const API = "/api/data";
-
-async function call<T>(key: string, init?: RequestInit): Promise<T> {
+/** `key` : profil anonyme ; null : compte Google (cookie de session). */
+async function call<T>(url: string, key: string | null, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(API, { ...init, headers: { "x-profile-key": key, "content-type": "application/json" } });
+    res = await fetch(url, {
+      ...init,
+      headers: { "content-type": "application/json", ...(key === null ? {} : { "x-profile-key": key }) },
+    });
   } catch {
     throw new ApiUnavailable("réseau indisponible");
   }
   // Pas d'API (hébergement statique, ex. GitHub Pages) : réponse HTML ou 404.
   if (!(res.headers.get("content-type") ?? "").includes("application/json")) throw new ApiUnavailable("pas d'API");
   const body = await res.json();
+  if (res.status === 401 && key === null) throw new SignedOut("Session expirée");
   if (!res.ok) throw new Error((body as { error?: string }).error ?? `Erreur ${res.status}`);
   return body as T;
 }
 
+type Remote = Snapshot & { updatedAt: number };
+
 export const api = {
-  get: (key: string) => call<(Snapshot & { updatedAt: number }) | { exists: false }>(key),
-  put: (key: string, data: Snapshot) => call<{ updatedAt: number; written: number; deleted: number }>(key, { method: "PUT", body: JSON.stringify(data) }),
+  get: (key: string | null) => call<Remote | { exists: false }>("/api/data", key),
+  put: (key: string | null, data: Snapshot) =>
+    call<{ updatedAt: number; written: number; deleted: number }>("/api/data", key, { method: "PUT", body: JSON.stringify(data) }),
+  me: () => call<{ enabled: boolean; user: { id: string; createdAt: number } | null }>("/api/auth/me", null),
+  adopt: (snapshot: Snapshot, profileKey: string) =>
+    call<Remote>("/api/auth/adopt", null, { method: "POST", body: JSON.stringify({ snapshot, profileKey }) }),
+  logout: (all: boolean) => call<{ ok: true }>("/api/auth/logout", null, { method: "POST", body: JSON.stringify({ all }) }),
+  deleteAccount: () => call<{ deleted: true }>("/api/account", null, { method: "DELETE" }),
 };

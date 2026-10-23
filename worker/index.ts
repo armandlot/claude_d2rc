@@ -3,11 +3,12 @@
  * - /api/* : API JSON adossée à Cloudflare D1 (binding DB).
  * - le reste : application (PWA) servie depuis les assets statiques (binding ASSETS).
  */
+import { accountProfileId, currentUser, handleAuth, sameOrigin, type AuthEnv } from "./auth";
 import { deleteProfile, readProfile, writeProfile } from "./db";
 import { isProfileKey, parseSnapshot } from "./model";
+import { sha256Hex } from "./oidc";
 
-export interface Env {
-  DB: D1Database;
+export interface Env extends AuthEnv {
   ASSETS: Fetcher;
 }
 
@@ -21,19 +22,26 @@ const json = (data: unknown, status = 200) =>
 
 const error = (status: number, message: string) => json({ error: message }, status);
 
-/** Empreinte SHA-256 de la clé : la clé elle-même n'est jamais stockée. */
-async function profileIdFrom(key: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
 async function handleApi(request: Request, env: Env, path: string): Promise<Response> {
   if (path === "/api/health") return json({ ok: true });
 
+  const auth = await handleAuth(request, env, path);
+  if (auth) return auth;
+
   if (path !== "/api/data") return error(404, "Route inconnue");
+  // Deux modes : clé de profil anonyme (en-tête), ou compte Google (cookie de session).
+  // Seule l'empreinte SHA-256 de la clé est stockée, jamais la clé elle-même.
+  let profileId: string;
   const key = request.headers.get("x-profile-key");
-  if (!isProfileKey(key)) return error(401, "En-tête X-Profile-Key manquant ou invalide");
-  const profileId = await profileIdFrom(key);
+  if (key !== null) {
+    if (!isProfileKey(key)) return error(401, "En-tête X-Profile-Key invalide");
+    profileId = await sha256Hex(key);
+  } else {
+    if (request.method !== "GET" && !sameOrigin(request)) return error(403, "Origine refusée");
+    const user = await currentUser(request, env);
+    if (!user) return error(401, "Non connecté");
+    profileId = accountProfileId(user.userId);
+  }
 
   switch (request.method) {
     case "GET": {

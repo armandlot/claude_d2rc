@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonical, isProfileKey, parseSnapshot, planChanges } from "./model";
+import { canonical, isProfileKey, mergeSnapshots, parseSnapshot, planChanges } from "./model";
 
 const character = { id: "c1", name: "", classId: "sorceress", spec: "Blizzard", magicFind: 400, ladder: true, hardcore: false };
 const session = {
@@ -67,5 +67,24 @@ describe("planChanges", () => {
   it("compare indépendamment de l'ordre des clés", () => {
     expect(canonical({ b: 1, a: { d: [1, 2], c: null } })).toBe(canonical({ a: { c: null, d: [1, 2] }, b: 1 }));
     expect(canonical({ a: 1, b: undefined })).toBe(canonical({ a: 1 }));
+  });
+});
+
+describe("mergeSnapshots", () => {
+  it("réunit le compte et l'appareil, l'appareil l'emporte sur un même identifiant", () => {
+    const account = {
+      characters: [character, { ...character, id: "c2", name: "Hammerdin" }],
+      customRoutes: [],
+      sessions: [{ ...session, id: "s-old", date: "2026-01-01T10:00:00.000Z" }],
+    };
+    const device = {
+      characters: [{ ...character, magicFind: 500 }],
+      customRoutes: [{ id: "r1", name: "Pindle + Meph", stops: ["pindleskin", "mephisto"] }],
+      sessions: [{ ...session, id: "s-new", date: "2026-10-01T10:00:00.000Z" }],
+    };
+    const merged = mergeSnapshots(account, device as typeof account);
+    expect(merged.characters.map((c) => [c.id, c.magicFind])).toEqual([["c1", 500], ["c2", 400]]);
+    expect(merged.customRoutes).toHaveLength(1);
+    expect(merged.sessions.map((s) => s.id)).toEqual(["s-new", "s-old"]);
   });
 });

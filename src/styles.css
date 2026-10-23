@@ -1490,3 +1490,80 @@ select {
     display: inline;
   }
 }
+
+/* ---- synchronisation ---- */
+.maintenance-switch {
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sync {
+  display: contents;
+}
+
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 3px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sync-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.s-synced .dot {
+  background: #3fd04f;
+}
+.s-syncing .dot {
+  background: var(--gold);
+}
+.s-offline .dot {
+  background: #e6b35a;
+}
+.s-error .dot {
+  background: #e0735f;
+}
+
+.sync-panel {
+  flex-basis: 100%;
+  order: 3;
+  text-align: left;
+  display: grid;
+  gap: 8px;
+}
+
+.sync-panel p,
+.sync-panel h3 {
+  margin: 0;
+}
+
+.key-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.key-row code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.key-row input {
+  flex: 1 1 240px;
+}

@@ -1,0 +1,26 @@
+# Configuration Cloudflare Workers — voir DEPLOY.md.
+name = "d2r-run-profit"
+main = "worker/index.ts"
+compatibility_date = "2026-10-01"
+
+# Application (PWA) construite par `npm run build` dans dist/.
+# Seules les routes /api/* passent par le Worker ; le reste est servi
+# directement comme fichiers statiques (gratuit et illimité).
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# Base de données D1. Remplacez database_id par l'identifiant affiché par
+# `npx wrangler d1 create d2r-run-profit` (voir DEPLOY.md, étape 2).
+# En local (`wrangler dev`), une base SQLite locale est utilisée : l'identifiant
+# n'a pas besoin d'être réel.
+[[d1_databases]]
+binding = "DB"
+database_name = "d2r-run-profit"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[observability]
+enabled = true

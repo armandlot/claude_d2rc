@@ -52,6 +52,27 @@ plus**.
   le dernier run terminé est exclu. Une session d'un seul run s'enregistre donc
   sans avoir à terminer le run avant.
 
+### Cloudflare Workers, D1 et PWA (v8)
+
+- Un seul Worker : les fichiers de `dist/` sont servis comme assets statiques
+  (gratuits, `run_worker_first` limité à `/api/*`), l'API est en TypeScript.
+  Python Workers + FastAPI étaient possibles (GA en 2026), mais aucun code Python
+  n'existait : TypeScript évite un second langage et une seconde chaîne d'outils,
+  partage les types avec l'application et démarre sans délai.
+- D1 remplace le stockage local comme référence (`migrations/0001_init.sql`).
+  Le localStorage reste le cache de l'appareil : l'application marche hors ligne.
+- Identité sans compte : clé de profil aléatoire (192 bits) par appareil, en-tête
+  `X-Profile-Key`, seule son empreinte SHA-256 est stockée. La même clé relie
+  plusieurs appareils.
+- Synchronisation (`src/lib/useCloudSync.ts`, `src/lib/sync.ts`) : réconciliation
+  au démarrage, au retour du réseau et au retour au premier plan ; envoi 1,5 s
+  après une modification. Conflit : la modification la plus récente l'emporte ;
+  un appareil jamais synchronisé n'écrase jamais un profil existant.
+- Écriture différentielle côté Worker : seules les lignes modifiées sont
+  réécrites (quota gratuit de 100 000 lignes écrites par jour), en quelques
+  requêtes groupées (`json_each`), dans un batch transactionnel. Une
+  synchronisation sans changement ne modifie pas la date du profil.
+
 ### Mode maintenance (v7)
 
 - Case « Mode maintenance » mémorisée ; elle ajoute un onglet dédié.
@@ -132,6 +153,7 @@ custom (`customRoutes.ts`) et verdicts (`verdict.ts`), traderie (`traderie.ts`) 
 - [ ] Version du jeu dans la fiche du personnage (paramètre Traderie)
 - [x] v7 : mode maintenance (explorer, corriger, supprimer les sessions)
 - [ ] Sauvegarde / restauration des données (export JSON)
+- [x] v8 : déploiement Cloudflare Workers, base D1, PWA, synchronisation entre appareils
 - [ ] Export / import des sessions (JSON) pour les partager
 - [ ] Graphique d'évolution par session
 - [ ] Bouton « unique élite » (base visible avant identification)

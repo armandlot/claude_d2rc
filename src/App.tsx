@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ROUTES } from "./data/routes";
 import { usePersistentState } from "./lib/storage";
 import { migrateLegacySessions, normalizeCharacter, type Character } from "./lib/characters";
@@ -10,6 +10,9 @@ import Characters from "./components/Characters";
 import RoutesManager from "./components/RoutesManager";
 import Help from "./components/Help";
 import Maintenance from "./components/Maintenance";
+import SyncPanel from "./components/SyncPanel";
+import { useCloudSync } from "./lib/useCloudSync";
+import type { Snapshot } from "./lib/sync";
 
 type Tab = "session" | "comparison" | "characters" | "routes" | "help" | "maintenance";
 
@@ -48,6 +51,18 @@ export default function App() {
     setSessions(res.sessions as SavedSession[]);
   }, [sessions, characters, setCharacters, setSessions]);
 
+  // Synchronisation avec Cloudflare D1 (inactive sans API, ex. GitHub Pages).
+  const applyRemote = useCallback(
+    (remote: Snapshot) => {
+      setCharacters(remote.characters);
+      setCustomRoutes(remote.customRoutes);
+      setSessions(remote.sessions);
+    },
+    [setCharacters, setCustomRoutes, setSessions],
+  );
+  const snapshot = useMemo(() => ({ characters, customRoutes, sessions }), [characters, customRoutes, sessions]);
+  const sync = useCloudSync(snapshot, applyRemote);
+
   const saveCharacter = (c: Character) =>
     setCharacters((prev) => (prev.some((x) => x.id === c.id) ? prev.map((x) => (x.id === c.id ? c : x)) : [...prev, c]));
 
@@ -84,6 +99,14 @@ export default function App() {
           ))}
         </nav>
         <div className="maintenance-switch">
+          <SyncPanel
+            status={sync.status}
+            message={sync.message}
+            pending={sync.pending}
+            profileKey={sync.profileKey}
+            onSyncNow={() => void sync.syncNow()}
+            onLinkProfile={sync.linkProfile}
+          />
           <label className="checkbox">
             <input
               id="maintenance-toggle"

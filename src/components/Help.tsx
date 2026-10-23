@@ -92,6 +92,13 @@ export default function Help() {
         restée bloquée peut aussi y être abandonnée.
       </p>
 
+      <h3>Sauvegarde et plusieurs appareils</h3>
+      <p>
+        Le badge sous les onglets indique l'état de la sauvegarde en ligne. Vos données restent utilisables hors ligne
+        et partent au retour du réseau. Pour les retrouver sur un autre appareil, copiez la clé de profil depuis ce
+        badge et collez-la sur l'autre appareil. Sur téléphone, « Ajouter à l'écran d'accueil » installe l'application.
+      </p>
+
       <h3>Lire la comparaison</h3>
       <ul>
         <li>Chaque taux = nombre de drops ÷ temps de jeu hors pause × 3 600.</li>

@@ -44,32 +44,41 @@ Groupes de runes (Ladder) :
 | Mid HR | Vex, Ohm, Lo |
 | High HR | Sur, Ber, Jah, Cham, Zod |
 
-Les données restent dans le navigateur (localStorage) ; aucun serveur, aucun compte.
+Déployée sur **Cloudflare Workers**, l'application est une **PWA** installable,
+utilisable hors ligne, dont les données sont sauvegardées dans **Cloudflare D1** et
+partagées entre appareils grâce à une clé de profil (sans compte). Sans serveur
+(ex. GitHub Pages), elle fonctionne entièrement dans le navigateur.
 
 ## Démarrer en local
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173/claude_d2rc/
-npm test         # tests des statistiques
-npm run build    # build de production dans dist/
+npm run worker:dev   # application + API + base D1 locale → http://localhost:8787
+npm test             # tests (application et Worker)
 ```
+
+Interface seule, avec rechargement à chaud : `npm run dev` (http://localhost:5173).
 
 ## Structure
 
 ```
-src/
-  data/           # classes et spés, routes, étapes, catégories de drops
-  lib/            # statistiques, personnages, routes custom, verdicts (purs, testés) + persistance
-  components/     # onglets Session, Comparaison, Personnages, Routes, Aide
-.github/workflows # CI (tests + build) et déploiement GitHub Pages
+src/              # application React (PWA)
+  data/           # classes et spés, routes, étapes, catégories de drops, noms d'objets
+  lib/            # statistiques, personnages, routes, verdicts, synchronisation (testés)
+  components/     # onglets
+public/           # manifeste PWA, service worker, icônes
+worker/           # API Cloudflare Worker (TypeScript) adossée à D1
+migrations/       # schéma SQL de la base D1
+wrangler.toml     # configuration Cloudflare
+DEPLOY.md         # brancher le dépôt à Cloudflare
 docs/DESIGN.md    # démarche de conception
 ```
 
 ## Mise en ligne
 
-Déploiement automatique sur **GitHub Pages** à chaque push sur `main`
-(voir [docs/DESIGN.md](docs/DESIGN.md#6-mise-en-ligne)).
+**Cloudflare Workers** (offre gratuite) : voir [DEPLOY.md](DEPLOY.md).
+
+Le workflow GitHub Pages reste disponible pour une version statique sans synchronisation.
 
 ---
 

@@ -11,6 +11,7 @@ import RoutesManager from "./components/RoutesManager";
 import Help from "./components/Help";
 import Maintenance from "./components/Maintenance";
 import SyncPanel from "./components/SyncPanel";
+import SeasonalDecor, { useSeasonalTheme } from "./components/SeasonalDecor";
 import { useCloudSync } from "./lib/useCloudSync";
 import type { Snapshot } from "./lib/sync";
 
@@ -62,6 +63,7 @@ export default function App() {
   );
   const snapshot = useMemo(() => ({ characters, customRoutes, sessions }), [characters, customRoutes, sessions]);
   const sync = useCloudSync(snapshot, applyRemote);
+  const season = useSeasonalTheme();
 
   const saveCharacter = (c: Character) =>
     setCharacters((prev) => (prev.some((x) => x.id === c.id) ? prev.map((x) => (x.id === c.id ? c : x)) : [...prev, c]));
@@ -69,6 +71,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
+        {season && <SeasonalDecor theme={season} />}
         <h1>
           D2R <span>Run Counter</span>
         </h1>

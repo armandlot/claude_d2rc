@@ -15,7 +15,30 @@ navigateur ──► Cloudflare Workers
 | Schéma de la base | `migrations/0001_init.sql` |
 | PWA (manifeste, service worker, icônes) | `public/` |
 
-## Prérequis
+## Version en ligne
+
+- Application : <https://d2r-run-counter.armandlot.workers.dev>
+- Base D1 : `d2r-run-counter` (`7f008dfe-6e06-4e69-9d2a-42482e464954`)
+- Déploiement automatique à chaque push sur la branche `claude/diablo2-profitability-app-fzoxvx`
+
+## Parcours sans rien installer (tableau de bord Cloudflare)
+
+C'est le parcours suivi pour la première mise en ligne :
+
+1. **D1** : *Storage & Databases* → *D1 SQL Database* → *Create*, nom `d2r-run-counter`.
+   L'identifiant est la fin de l'adresse de la page de la base (après `/databases/`) ;
+   le reporter dans `database_id` de `wrangler.toml`.
+2. **Tables** : onglet *Console* de la base, coller le contenu de
+   `migrations/0001_init.sql` puis *Execute*.
+3. **Worker** : *Workers & Pages* → *Create* → *Import a repository* (Workers),
+   projet `d2r-run-counter`, build `npm run build`, deploy `npx wrangler deploy`.
+
+> Les tables ayant été créées depuis la console, Wrangler n'a pas d'historique de
+> migrations. Si l'on utilise un jour `wrangler d1 migrations apply`, il rejouera
+> `0001_init.sql` : sans effet, grâce aux `IF NOT EXISTS`. Une future migration
+> `0002_….sql` pourra aussi être collée dans la console.
+
+## Prérequis (parcours en ligne de commande)
 
 - Un compte Cloudflare (gratuit) : <https://dash.cloudflare.com/sign-up>
 - Node.js 20 ou plus récent

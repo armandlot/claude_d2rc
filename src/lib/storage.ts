@@ -1,6 +1,35 @@
 import { useCallback, useRef, useState } from "react";
 
-const PREFIX = "d2r-run-profit:";
+const PREFIX = "d2r-run-counter:";
+// Ancien nom de l'application : les données sont reprises une seule fois.
+const LEGACY_PREFIX = "d2r-run-profit:";
+
+/** Copie les clés enregistrées sous l'ancien nom vers le nouveau (sans écraser). */
+export function migrateLegacyStorage(storage: Storage): number {
+  let moved = 0;
+  try {
+    // Liste figée d'abord : ajouter ou retirer des clés décale leurs positions.
+    const keys = Array.from({ length: storage.length }, (_, i) => storage.key(i));
+    for (const key of keys) {
+      if (!key?.startsWith(LEGACY_PREFIX)) continue;
+      const next = PREFIX + key.slice(LEGACY_PREFIX.length);
+      if (storage.getItem(next) === null) {
+        storage.setItem(next, storage.getItem(key)!);
+        moved++;
+      }
+      storage.removeItem(key);
+    }
+  } catch {
+    // Stockage indisponible : rien à reprendre.
+  }
+  return moved;
+}
+
+try {
+  if (typeof localStorage !== "undefined") migrateLegacyStorage(localStorage);
+} catch {
+  // localStorage inaccessible (navigation privée stricte).
+}
 
 function read<T>(key: string, initial: T): T {
   try {

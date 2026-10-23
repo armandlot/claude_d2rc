@@ -70,7 +70,7 @@ export default function App() {
     <div className="app">
       <header className="header">
         <h1>
-          D2R <span>Run Profit</span>
+          D2R <span>Run Counter</span>
         </h1>
         <p className="tagline">Comptez vos uniques, sets et runes par heure pour trouver le meilleur duo personnage + route.</p>
         <nav className="tabs" role="tablist">

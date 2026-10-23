@@ -1,4 +1,4 @@
-# D2R Run Profit
+# D2R Run Counter
 
 Application web pour les joueurs de **Diablo II: Resurrected** : elle compare vos
 routes de farm (Mephisto, Chaos Sanctuary, Pit, Cows…) en comptant les

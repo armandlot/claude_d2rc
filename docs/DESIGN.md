@@ -1,4 +1,4 @@
-# Conception de D2R Run Profit
+# Conception de D2R Run Counter
 
 Ce document retrace la démarche, de l'idée à la mise en ligne.
 

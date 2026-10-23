@@ -1,4 +1,4 @@
--- D2R Run Profit : schéma initial (Cloudflare D1 / SQLite).
+-- D2R Run Counter : schéma initial (Cloudflare D1 / SQLite).
 --
 -- Pas de comptes utilisateurs : chaque appareil (ou groupe d'appareils liés)
 -- possède une « clé de profil » secrète. On n'en stocke que l'empreinte SHA-256

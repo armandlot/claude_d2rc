@@ -1,4 +1,4 @@
-# Déployer D2R Run Profit sur Cloudflare Workers
+# Déployer D2R Run Counter sur Cloudflare Workers
 
 L'application tient dans **un seul Worker**, sur l'offre gratuite :
 
@@ -32,7 +32,7 @@ Une page s'ouvre dans le navigateur pour autoriser Wrangler sur votre compte.
 ## 2. Créer la base D1
 
 ```bash
-npx wrangler d1 create d2r-run-profit
+npx wrangler d1 create d2r-run-counter
 ```
 
 La commande affiche un bloc contenant `database_id = "…"`. Copiez cet identifiant
@@ -41,7 +41,7 @@ dans `wrangler.toml`, à la place de `00000000-0000-0000-0000-000000000000` :
 ```toml
 [[d1_databases]]
 binding = "DB"
-database_name = "d2r-run-profit"
+database_name = "d2r-run-counter"
 database_id = "l-identifiant-affiché"   # ← ici
 migrations_dir = "migrations"
 ```
@@ -65,7 +65,7 @@ Commitez et poussez la modification de `wrangler.toml`.
 
    | Champ | Valeur |
    | --- | --- |
-   | Project name | `d2r-run-profit` (doit être identique à `name` dans `wrangler.toml`) |
+   | Project name | `d2r-run-counter` (doit être identique à `name` dans `wrangler.toml`) |
    | Production branch | `main` (ou la branche que vous déployez) |
    | Build command | `npm run build` |
    | Deploy command | `npx wrangler d1 migrations apply DB --remote && npx wrangler deploy` |
@@ -75,7 +75,7 @@ Commitez et poussez la modification de `wrangler.toml`.
 
 À chaque push sur la branche de production, Cloudflare construit l'application,
 applique les nouvelles migrations D1 puis déploie. L'adresse du site s'affiche à la
-fin du premier déploiement : `https://d2r-run-profit.<votre-sous-domaine>.workers.dev`.
+fin du premier déploiement : `https://d2r-run-counter.<votre-sous-domaine>.workers.dev`.
 
 > Si la commande de migration échoue pendant le déploiement (droits du jeton de
 > build sur D1), remplacez la *Deploy command* par `npx wrangler deploy` et lancez

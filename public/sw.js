@@ -1,9 +1,9 @@
-/* Service worker D2R Run Profit : l'application s'ouvre même sans réseau.
+/* Service worker D2R Run Counter : l'application s'ouvre même sans réseau.
  * - Pages : réseau d'abord (pour recevoir les mises à jour), copie en cache sinon.
  * - Fichiers /assets/* (noms versionnés par Vite) : cache d'abord.
  * - /api/* : jamais mis en cache (données synchronisées par l'application).
  */
-const CACHE = "d2r-run-profit-v1";
+const CACHE = "d2r-run-counter-v2";
 const SHELL = ["./", "./manifest.webmanifest", "./icon.svg", "./icon-192.png"];
 
 self.addEventListener("install", (event) => {

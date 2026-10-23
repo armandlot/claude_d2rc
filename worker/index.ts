@@ -1,5 +1,5 @@
 /**
- * Worker D2R Run Profit.
+ * Worker D2R Run Counter.
  * - /api/* : API JSON adossée à Cloudflare D1 (binding DB).
  * - le reste : application (PWA) servie depuis les assets statiques (binding ASSETS).
  */

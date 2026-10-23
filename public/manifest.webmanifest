@@ -1,6 +1,6 @@
 {
-  "name": "D2R Run Profit",
-  "short_name": "Run Profit",
+  "name": "D2R Run Counter",
+  "short_name": "Run Counter",
   "description": "Comptez vos uniques, sets et runes par heure pour trouver le meilleur duo personnage + route dans Diablo II: Resurrected.",
   "lang": "fr",
   "start_url": "./",

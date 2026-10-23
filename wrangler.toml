@@ -1,5 +1,5 @@
 # Configuration Cloudflare Workers — voir DEPLOY.md.
-name = "d2r-run-profit"
+name = "d2r-run-counter"
 main = "worker/index.ts"
 compatibility_date = "2026-10-01"
 
@@ -13,13 +13,13 @@ not_found_handling = "single-page-application"
 run_worker_first = ["/api/*"]
 
 # Base de données D1. Remplacez database_id par l'identifiant affiché par
-# `npx wrangler d1 create d2r-run-profit` (voir DEPLOY.md, étape 2).
+# `npx wrangler d1 create d2r-run-counter` (voir DEPLOY.md, étape 2).
 # En local (`wrangler dev`), une base SQLite locale est utilisée : l'identifiant
 # n'a pas besoin d'être réel.
 [[d1_databases]]
 binding = "DB"
-database_name = "d2r-run-profit"
-database_id = "991efc31-0e81-4e6d-abff-5d5030c36e55"
+database_name = "d2r-run-counter"
+database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"
 
 [observability]

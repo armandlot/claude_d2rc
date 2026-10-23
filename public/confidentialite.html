@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confidentialité – D2R Run Counter</title>
+    <style>
+      :root { color-scheme: dark; }
+      body { margin: 0; background: #0e0c0a; color: #e8e0d4; font: 16px/1.6 system-ui, sans-serif; }
+      main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+      h1 { color: #d4a94f; font-size: 1.6rem; }
+      h2 { color: #d4a94f; font-size: 1.15rem; margin-top: 28px; }
+      a { color: #d4a94f; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Données personnelles et confidentialité</h1>
+      <p>
+        D2R Run Counter est un projet communautaire non officiel. Il est conçu pour collecter le strict minimum.
+      </p>
+
+      <h2>Ce qui est enregistré</h2>
+      <ul>
+        <li>Vos données de jeu : personnages, routes, sessions de farm et objets notés.</li>
+        <li>
+          Si vous utilisez « Se connecter avec Google » : un identifiant de compte, sous forme d'empreinte non réversible
+          (HMAC-SHA256) de l'identifiant anonyme fourni par Google, avec les dates de création et de dernière connexion.
+        </li>
+        <li>Votre session de connexion : un cookie technique, dont le serveur ne garde que l'empreinte.</li>
+      </ul>
+
+      <h2>Ce qui n'est jamais demandé ni enregistré</h2>
+      <ul>
+        <li>Ni adresse e-mail, ni nom, ni photo : seule l'autorisation « openid » est demandée à Google.</li>
+        <li>Aucun mot de passe : l'authentification est faite par Google.</li>
+        <li>Aucun jeton d'accès Google conservé, aucun traceur publicitaire, aucune revente.</li>
+      </ul>
+
+      <h2>Où sont les données</h2>
+      <p>
+        Dans votre navigateur (pour l'usage hors ligne) et dans une base Cloudflare D1 liée à l'application. Le cookie de
+        session expire après 90 jours sans utilisation.
+      </p>
+
+      <h2>Vos droits</h2>
+      <p>
+        Le menu de synchronisation propose « Supprimer mon compte et mes données » : le compte, ses sessions de connexion
+        et toutes ses données de jeu sont alors effacés du serveur et de l'appareil. Vous pouvez aussi retirer l'accès de
+        l'application depuis votre compte Google (Sécurité → Applications tierces).
+      </p>
+
+      <p><a href="/">← Retour à l'application</a></p>
+    </main>
+  </body>
+</html>

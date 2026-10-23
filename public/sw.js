@@ -3,7 +3,7 @@
  * - Fichiers /assets/* (noms versionnés par Vite) : cache d'abord.
  * - /api/* : jamais mis en cache (données synchronisées par l'application).
  */
-const CACHE = "d2r-run-counter-v2";
+const CACHE = "d2r-run-counter-v3";
 const SHELL = ["./", "./manifest.webmanifest", "./icon.svg", "./icon-192.png"];
 
 self.addEventListener("install", (event) => {
@@ -23,6 +23,8 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname.includes("/api/")) return;
+  // Pages annexes (ex. /confidentialite) : ce n'est pas l'application, ne pas les garder comme telle.
+  if (request.mode === "navigate" && url.pathname !== new URL(self.registration.scope).pathname) return;
 
   if (request.mode === "navigate") {
     event.respondWith(

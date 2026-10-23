@@ -1555,17 +1555,50 @@ select {
   align-items: center;
 }
 
-.key-row code {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px 10px;
-  font-size: 13px;
-  overflow-wrap: anywhere;
+.s-signed-out .dot {
+  background: #e6b35a;
 }
 
-.key-row input {
-  flex: 1 1 240px;
+/* Bouton Google : charte officielle (fond clair, logo G, police lisible). */
+.google-btn {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid #747775;
+  border-radius: 4px;
+  padding: 9px 14px;
+  font: 500 14px/1.2 Roboto, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.google-btn:hover {
+  background: #f2f2f2;
+}
+
+.auth-notice {
+  flex-basis: 100%;
+  order: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+  text-align: left;
+}
+
+.auth-notice.n-ok {
+  border-color: #3fd04f;
+}
+
+.auth-notice.n-warn {
+  border-color: #e6b35a;
 }
 
 /* ---- Thème saisonnier : Halloween (actif jusqu'au 2 novembre 00:00) ----

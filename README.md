@@ -46,7 +46,8 @@ Groupes de runes (Ladder) :
 
 Déployée sur **Cloudflare Workers**, l'application est une **PWA** installable,
 utilisable hors ligne, dont les données sont sauvegardées dans **Cloudflare D1** et
-partagées entre appareils grâce à une clé de profil (sans compte). Sans serveur
+partagées entre appareils avec « Se connecter avec Google » (identifiant anonyme
+seulement : ni e-mail, ni nom, ni mot de passe). Sans serveur
 (ex. GitHub Pages), elle fonctionne entièrement dans le navigateur.
 
 ## Démarrer en local

@@ -129,3 +129,19 @@ export function planChanges(existing: Map<string, string>, incoming: Map<string,
 }
 
 export { canonical } from "../src/lib/canonical";
+
+/**
+ * Fusionne les données d'un appareil dans celles d'un compte (première connexion).
+ * Union par identifiant ; en cas de doublon, la version de l'appareil l'emporte.
+ */
+export function mergeSnapshots(account: Snapshot, device: Snapshot): Snapshot {
+  const union = <T extends { id: string }>(base: T[], incoming: T[]) => {
+    const ids = new Set(incoming.map((x) => x.id));
+    return [...incoming, ...base.filter((x) => !ids.has(x.id))];
+  };
+  return {
+    characters: union(account.characters, device.characters),
+    customRoutes: union(account.customRoutes, device.customRoutes),
+    sessions: union(account.sessions, device.sessions).sort((a, b) => b.date.localeCompare(a.date)),
+  };
+}

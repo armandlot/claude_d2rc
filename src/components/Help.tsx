@@ -95,8 +95,10 @@ export default function Help() {
       <h3>Sauvegarde et plusieurs appareils</h3>
       <p>
         Le badge sous les onglets indique l'état de la sauvegarde en ligne. Vos données restent utilisables hors ligne
-        et partent au retour du réseau. Pour les retrouver sur un autre appareil, copiez la clé de profil depuis ce
-        badge et collez-la sur l'autre appareil. Sur téléphone, « Ajouter à l'écran d'accueil » installe l'application.
+        et partent au retour du réseau. Pour les retrouver sur un autre appareil, touchez ce badge puis « Se connecter
+        avec Google » sur chaque appareil, avec le même compte. L'application ne reçoit de Google qu'un identifiant
+        anonyme : ni e-mail, ni nom, ni mot de passe. Sur téléphone, « Ajouter à l'écran d'accueil » installe
+        l'application.
       </p>
 
       <h3>Lire la comparaison</h3>

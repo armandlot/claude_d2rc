@@ -19,7 +19,7 @@ navigateur ──► Cloudflare Workers
 
 - Application : <https://d2r-run-counter.armandlot.workers.dev>
 - Base D1 : `d2r-run-counter` (`7f008dfe-6e06-4e69-9d2a-42482e464954`)
-- Déploiement automatique à chaque push sur la branche `claude/diablo2-profitability-app-fzoxvx`
+- Déploiement automatique à chaque push sur la branche `main`
 
 ## Parcours sans rien installer (tableau de bord Cloudflare)
 

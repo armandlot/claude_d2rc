@@ -1,8 +1,9 @@
-name: Déploiement GitHub Pages
+name: Déploiement GitHub Pages (version statique, manuel)
 
+# L'application est hébergée sur Cloudflare Workers (voir DEPLOY.md).
+# Ce workflow reste disponible pour publier une version statique, sans
+# synchronisation, sur GitHub Pages : Actions → Run workflow.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

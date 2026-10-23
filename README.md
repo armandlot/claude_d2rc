@@ -78,7 +78,11 @@ docs/DESIGN.md    # démarche de conception
 
 **Cloudflare Workers** (offre gratuite) : voir [DEPLOY.md](DEPLOY.md).
 
-Le workflow GitHub Pages reste disponible pour une version statique sans synchronisation.
+Version en ligne : <https://d2r-run-counter.armandlot.workers.dev>, déployée
+automatiquement à chaque push sur `main`.
+
+Le workflow GitHub Pages reste disponible (déclenchement manuel) pour une version
+statique sans synchronisation.
 
 ---
 

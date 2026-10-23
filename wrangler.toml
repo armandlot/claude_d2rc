@@ -19,7 +19,7 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "d2r-run-counter"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "7f008dfe-6e06-4e69-9d2a-42482e464954"
 migrations_dir = "migrations"
 
 [observability]
